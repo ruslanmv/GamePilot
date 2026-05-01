@@ -1,6 +1,16 @@
 # .github/workflows/release.yml
 # Build distributions on GitHub Release and publish to PyPI (Trusted Publishers)
 # Automatically patches version from the release tag before building.
+#
+# IMPORTANT: This workflow uses PyPI Trusted Publishing. For it to succeed,
+# a Trusted Publisher must be configured on PyPI with these EXACT values:
+#   Owner:             ruslanmv
+#   Repository name:   GamePilot
+#   Workflow filename: release.yml
+#   Environment name:  pypi
+# For the very first release, use a "Pending Publisher" on your PyPI account
+# page (https://pypi.org/manage/account/publishing/). See docs/PUBLISHING.md.
+
 name: Build & Publish to PyPI
 
 on:
@@ -15,6 +25,7 @@ jobs:
   build:
     name: Build distributions
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,18 +56,18 @@ jobs:
 
       - name: Build wheel and sdist
         run: |
-          # Ensure clean dist/ in the CI workspace
+          # Just in case, ensure clean dist/ in the CI workspace
           rm -rf dist build
           python -m build
 
-      - name: Upload artifacts to the GitHub release
+      - name: Upload artefacts to the GitHub release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             dist/*.whl
             dist/*.tar.gz
 
-      - name: Persist artifacts for publish job
+      - name: Persist artefacts for publish job
         uses: actions/upload-artifact@v4
         with:
           name: python-dists
@@ -70,7 +81,7 @@ jobs:
       name: pypi
       url: https://pypi.org/project/gamepilot/
     steps:
-      - name: Download artifacts
+      - name: Download artefacts
         uses: actions/download-artifact@v4
         with:
           name: python-dists
