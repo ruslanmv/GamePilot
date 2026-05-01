@@ -1,0 +1,23 @@
+action_to_input:
+  move_forward:
+    keyboard: ["w"]
+  move_backward:
+    keyboard: ["s"]
+  turn_left:
+    mouse_dx: -40
+  turn_right:
+    mouse_dx: 40
+  attack_target:
+    keyboard: ["1"]
+  dodge:
+    keyboard: ["space"]
+  retreat:
+    keyboard: ["shift", "s"]
+  collect_item:
+    keyboard: ["f"]
+  interact:
+    keyboard: ["e"]
+  follow_marker:
+    keyboard: ["w"]
+  open_menu:
+    keyboard: ["esc"]

@@ -1,0 +1,64 @@
+# Open World RPG Domain Profile
+# Works for: Skyrim, Elden Ring, Zelda, Witcher, Dragon Age
+
+name: "Open World RPG"
+domain_type: "open_world_rpg"
+category: "role_playing"
+
+domains:
+  - combat
+  - exploration
+  - questing
+  - character_development
+  - social_interaction
+  - inventory_management
+
+# Character progression
+progression_systems:
+  - experience_points
+  - skill_trees
+  - equipment_upgrades
+  - ability_unlocks
+
+# Quest types
+quest_types:
+  - main_story
+  - side_quest
+  - collection
+  - combat_challenge
+  - exploration
+
+# Combat mechanics
+combat_focus:
+  - positioning
+  - timing
+  - resource_management
+  - enemy_patterns
+  - build_optimization
+
+strategies:
+  exploration:
+    - mark_discovered_locations
+    - note_quest_markers
+    - collect_discoverable_items
+    - map_fast_travel_points
+  
+  combat:
+    - assess_enemy_strength
+    - prepare_appropriate_gear
+    - use_environment
+    - manage_resources
+  
+  progression:
+    - focus_build_synergy
+    - complete_side_content
+    - upgrade_equipment
+    - unlock_key_abilities
+
+companion:
+  tone: "strategic_advisor"
+  focus:
+    - quest_optimization
+    - build_planning
+    - combat_tactics
+    - exploration_efficiency

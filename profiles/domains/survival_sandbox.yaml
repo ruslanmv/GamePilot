@@ -1,0 +1,93 @@
+# Survival Sandbox Domain Profile
+# Works for: Minecraft, Terraria, Valheim, Rust, ARK, 7 Days to Die
+
+name: "Survival Sandbox"
+domain_type: "survival_sandbox"
+category: "sandbox_construction"
+
+# Universal domains supported
+domains:
+  - combat
+  - construction
+  - resource_management
+  - exploration
+  - crafting
+  - survival
+
+# Common materials in survival games
+materials:
+  - wood
+  - stone
+  - iron
+  - metal
+  - fiber
+  - leather
+
+# Universal resource types
+resources:
+  - wood
+  - stone
+  - ore
+  - food
+  - water
+  - fuel
+
+# Common structure types
+structures:
+  - shelter
+  - storage
+  - workshop
+  - farm
+  - defense_structure
+
+# Universal enemy types
+threats:
+  - hostile_creature
+  - environmental_hazard
+  - hunger
+  - thirst
+  - temperature
+
+# Universal strategies
+strategies:
+  early_game:
+    priority:
+      - gather_basic_resources
+      - craft_tools
+      - build_shelter
+      - secure_food_source
+  
+  mid_game:
+    priority:
+      - establish_base
+      - upgrade_tools
+      - explore_areas
+      - stockpile_resources
+  
+  late_game:
+    priority:
+      - advanced_crafting
+      - fortifications
+      - automation
+      - boss_preparation
+
+# Safety priorities
+survival_priorities:
+  - maintain_health: 50
+  - maintain_hunger: 60
+  - maintain_shelter: true
+  - avoid_night_combat: true
+  - retreat_when_outnumbered: true
+
+# Companion personality for this domain
+companion:
+  tone: "survival_guide"
+  focus:
+    - resource_efficiency
+    - threat_awareness
+    - strategic_planning
+  warn_about:
+    - low_health
+    - approaching_night
+    - dangerous_areas
+    - resource_depletion

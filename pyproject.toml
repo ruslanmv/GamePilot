@@ -1,0 +1,159 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gamepilot"
+version = "0.1.0b1"
+description = "Universal AI Companion for Any Virtual World - Your Gaming Copilot"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = { text = "MIT" }
+authors = [
+    { name = "Ruslan Magana Vsevolodovna", email = "contact@ruslanmv.com" }
+]
+keywords = ["ai", "gaming", "companion", "assistant", "llm", "computer-vision", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+# MINIMAL CORE DEPENDENCIES
+# Most features are optional extras
+dependencies = [
+    # Core framework
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.6.0",
+    "python-multipart>=0.0.9",
+    
+    # Data handling
+    "numpy>=1.24.0,<2.0.0",
+    "pyyaml>=6.0",
+    
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+# LLM Providers (for companion mode)
+llm-openai = [
+    "openai>=1.12.0",
+]
+
+llm-watsonx = [
+    "ibm-watsonx-ai>=1.0.0",
+]
+
+llm-anthropic = [
+    "anthropic>=0.18.0",
+]
+
+companion = [
+    "gamepilot[llm-openai,llm-watsonx,llm-anthropic]",
+]
+
+# Computer vision (for visual understanding)
+vision = [
+    "opencv-python>=4.9.0",
+    "ultralytics>=8.1.0",  # YOLO
+    "easyocr>=1.7.0",      # OCR
+    "pillow>=10.2.0",
+]
+
+# Screen capture (for real-time observation)
+screen = [
+    "mss>=9.0.0",
+]
+
+# Input control (for agent mode in sandboxes)
+control = [
+    "pynput>=1.7.6",
+]
+
+# Deep learning (for model training)
+ml = [
+    "torch>=2.0.0,<3.0.0",
+    "torchvision>=0.15.0",
+]
+
+# Training & research
+training = [
+    "gamepilot[ml,vision]",
+    "wandb>=0.16.0",
+    "tensorboard>=2.16.0",
+    "scikit-learn>=1.4.0",
+    "matplotlib>=3.8.0",
+]
+
+# Development tools
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+]
+
+# Voice interaction (v0.4.0)
+voice = [
+    "SpeechRecognition>=3.10.0",
+    "gTTS>=2.5.0",
+    "pygame>=2.5.0",
+]
+
+# Full installation
+all = [
+    "gamepilot[companion,vision,screen,control,ml,voice]",
+]
+
+[project.scripts]
+gamepilot = "gamepilot.app.main:main"
+
+[project.urls]
+Homepage = "https://github.com/ruslanmv/gamepilot"
+Repository = "https://github.com/ruslanmv/gamepilot"
+Documentation = "https://github.com/ruslanmv/gamepilot/tree/main/docs"
+"Bug Tracker" = "https://github.com/ruslanmv/gamepilot/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gamepilot*"]
+exclude = ["tests*", "scripts*", "evaluation*", "examples*", "frontend*", "docs*", "hf*", "models*", "config*", "profiles*", "data*"]
+
+[tool.setuptools.package-data]
+gamepilot = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v"

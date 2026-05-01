@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+      shell: bash
+    
+    - name: Install dependencies
+      run: |
+        uv venv
+        uv pip install -e ".[dev]"
+      shell: bash
+    
+    - name: Lint with ruff
+      run: |
+        uv run ruff check gamepilot tests
+      shell: bash
+    
+    - name: Type check with mypy
+      run: |
+        uv run mypy gamepilot --ignore-missing-imports
+      shell: bash
+      continue-on-error: true  # Don't fail on type errors for now
+    
+    - name: Run tests
+      run: |
+        uv run pytest tests/ -v --cov=gamepilot --cov-report=xml --cov-report=term
+      shell: bash
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
+        fail_ci_if_error: false
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    
+    - name: Install dependencies
+      run: |
+        uv venv
+        uv pip install -e ".[dev]"
+    
+    - name: Check formatting with black
+      run: |
+        uv run black --check gamepilot tests
+    
+    - name: Lint with ruff
+      run: |
+        uv run ruff check gamepilot tests
+
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: gamepilot:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Test Docker image
+      run: |
+        docker run --rm gamepilot:test python -c "import gamepilot; print(gamepilot.__version__)"
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit
+    
+    - name: Security check with safety
+      run: safety check --json
+      continue-on-error: true
+    
+    - name: Security check with bandit
+      run: bandit -r gamepilot -f json -o bandit-report.json
+      continue-on-error: true
+    
+    - name: Upload bandit results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: bandit-report
+        path: bandit-report.json

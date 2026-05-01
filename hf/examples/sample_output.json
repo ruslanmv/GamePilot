@@ -1,0 +1,26 @@
+{
+  "top_action": "move_forward",
+  "confidence": 0.91,
+  "top_5": [
+    [
+      "move_forward",
+      0.91
+    ],
+    [
+      "turn_left",
+      0.04
+    ],
+    [
+      "idle",
+      0.02
+    ],
+    [
+      "interact",
+      0.02
+    ],
+    [
+      "attack_target",
+      0.01
+    ]
+  ]
+}

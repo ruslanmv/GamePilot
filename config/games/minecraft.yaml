@@ -1,0 +1,181 @@
+# Minecraft Game Profile for GamePilot v0.3.0
+
+name: "Minecraft"
+version: "1.20+"
+type: "sandbox_construction"
+category: "survival_creative"
+
+# Supported domains for this game
+domains:
+  - combat
+  - construction
+  - resource_management
+  - exploration
+  - crafting
+
+# HUD element locations (relative to screen size)
+# These can be calibrated per user
+hud_regions:
+  hp_bar:
+    x: 10
+    y: 10
+    width: 100
+    height: 20
+    relative: true  # Relative to screen size
+  
+  hunger_bar:
+    x: 10
+    y: 35
+    width: 100
+    height: 20
+    relative: true
+  
+  hotbar:
+    x: 50
+    y: 95
+    width: 40
+    height: 8
+    relative: true
+  
+  inventory:
+    x: 50
+    y: 50
+    width: 40
+    height: 40
+    relative: true
+
+# Keyboard/mouse mappings
+actions:
+  move_forward: "W"
+  move_backward: "S"
+  strafe_left: "A"
+  strafe_right: "D"
+  jump: "SPACE"
+  sneak: "SHIFT"
+  sprint: "CTRL"
+  attack: "LEFT_CLICK"
+  use: "RIGHT_CLICK"
+  drop: "Q"
+  inventory: "E"
+  chat: "T"
+  hotbar_1: "1"
+  hotbar_2: "2"
+  hotbar_3: "3"
+  hotbar_4: "4"
+  hotbar_5: "5"
+  hotbar_6: "6"
+  hotbar_7: "7"
+  hotbar_8: "8"
+  hotbar_9: "9"
+
+# Object detection labels
+detections:
+  enemies:
+    - "zombie"
+    - "skeleton"
+    - "creeper"
+    - "spider"
+    - "enderman"
+    - "witch"
+    - "pillager"
+  
+  resources:
+    - "tree"
+    - "oak_log"
+    - "birch_log"
+    - "ore"
+    - "iron_ore"
+    - "coal_ore"
+    - "diamond_ore"
+    - "chest"
+    - "animal"
+    - "sheep"
+    - "cow"
+    - "pig"
+  
+  structures:
+    - "house"
+    - "village"
+    - "temple"
+    - "stronghold"
+    - "mineshaft"
+  
+  npcs:
+    - "villager"
+    - "iron_golem"
+
+# Construction materials available
+materials:
+  - wood
+  - stone
+  - iron
+  - diamond
+  - brick
+  - glass
+  - dirt
+  - sand
+  - cobblestone
+
+# Crafting recipes (simplified)
+crafting:
+  wooden_pickaxe:
+    ingredients:
+      - wood: 3
+      - stick: 2
+  
+  stone_pickaxe:
+    ingredients:
+      - cobblestone: 3
+      - stick: 2
+  
+  crafting_table:
+    ingredients:
+      - wood: 4
+
+# Strategy recommendations
+strategies:
+  early_game:
+    priority:
+      - gather_wood
+      - craft_tools
+      - build_shelter
+      - find_food
+  
+  mid_game:
+    priority:
+      - mine_resources
+      - upgrade_tools
+      - establish_farm
+      - explore_caves
+  
+  late_game:
+    priority:
+      - find_diamonds
+      - enchant_equipment
+      - explore_nether
+      - defeat_ender_dragon
+
+# Safety rules
+safety:
+  avoid_night_combat: true
+  maintain_food_level: 60  # Percentage
+  maintain_health: 50  # Percentage
+  retreat_when_outnumbered: true
+  use_shelter_at_night: true
+
+# Companion personality adjustments
+companion:
+  tone: "helpful_guide"
+  detail_level: "medium"
+  warn_dangers: true
+  suggest_optimizations: true
+  
+# OCR text regions for reading
+ocr_regions:
+  coordinates:
+    enabled: true
+    position: "top_left"
+  
+  debug_info:
+    enabled: false
+    position: "top_right"

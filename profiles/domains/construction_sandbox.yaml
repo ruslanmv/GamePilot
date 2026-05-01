@@ -1,0 +1,83 @@
+# Construction Sandbox Domain Profile
+# Works for: Minecraft Creative, Terraria, Planet Coaster, Cities Skylines
+
+name: "Construction Sandbox"
+domain_type: "construction_sandbox"
+category: "creative_building"
+
+domains:
+  - construction
+  - design
+  - resource_management
+  - planning
+
+# Building priorities
+building_focus:
+  - aesthetics
+  - functionality
+  - efficiency
+  - scale
+
+# Structure complexity levels
+complexity_levels:
+  simple:
+    - basic_shelter
+    - storage
+    - simple_farm
+  
+  medium:
+    - detailed_house
+    - multi_room_structure
+    - functional_facility
+  
+  advanced:
+    - castle
+    - city
+    - complex_mechanism
+    - artistic_build
+
+# Design principles
+design_principles:
+  - symmetry
+  - proportion
+  - color_harmony
+  - spatial_flow
+  - thematic_consistency
+
+# Material combinations
+material_palettes:
+  medieval:
+    - stone
+    - wood
+    - thatch
+  
+  modern:
+    - concrete
+    - glass
+    - metal
+  
+  fantasy:
+    - crystal
+    - magical_materials
+    - rare_blocks
+
+strategies:
+  planning:
+    - sketch_blueprint
+    - gather_materials
+    - clear_area
+    - establish_foundation
+  
+  execution:
+    - build_framework
+    - add_details
+    - refine_aesthetics
+    - final_touches
+
+companion:
+  tone: "creative_advisor"
+  focus:
+    - design_suggestions
+    - material_optimization
+    - structural_planning
+    - inspiration

@@ -1,0 +1,14 @@
+[
+  "idle",
+  "move_forward",
+  "move_backward",
+  "turn_left",
+  "turn_right",
+  "attack_target",
+  "dodge",
+  "retreat",
+  "collect_item",
+  "interact",
+  "follow_marker",
+  "open_menu"
+]
