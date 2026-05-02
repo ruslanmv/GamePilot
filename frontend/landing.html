@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GamePilot — Stop rage quitting. Start winning.</title>
+<link rel="stylesheet" href="/static/colors_and_type.css"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--gp-bg-deep); color: var(--gp-fg-1); font-family: var(--gp-font-body); -webkit-font-smoothing: antialiased; }
+
+  body {
+    background-image:
+      linear-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14, 165, 233, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 70% -10%, rgba(217,70,239,.18), transparent 60%),
+                radial-gradient(ellipse at 0% 100%, rgba(14,165,233,.15), transparent 50%);
+    z-index: 0;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: sticky; top:0; z-index: 50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 48px;
+    background: rgba(5,11,20,.7); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--gp-border);
+  }
+  nav .logo { display:flex; align-items:center; gap:10px; }
+  nav .logo img { height: 30px; }
+  nav ul { display:flex; gap: 28px; list-style:none; }
+  nav a { color: var(--gp-fg-3); font-family: var(--gp-font-display); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; text-decoration: none; }
+  nav a:hover { color: var(--gp-primary); }
+  .btn-cta {
+    background: rgba(14,165,233,.15); color: var(--gp-primary); border:1px solid var(--gp-primary);
+    padding: 8px 16px; border-radius: 4px; font-family: var(--gp-font-display); font-weight:700;
+    font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; cursor:pointer; text-decoration:none;
+  }
+
+  section { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 96px 48px; }
+
+  /* ===== HERO ===== */
+  .hero { padding-top: 80px; padding-bottom: 60px; }
+  .hero-grid { display:grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: center; }
+  .badge-row { display:flex; gap:8px; margin-bottom: 28px; }
+  .badge-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    padding: 4px 12px; border-radius: 999px; border:1px solid var(--gp-border);
+    font-family: var(--gp-font-mono); font-size: 10px; letter-spacing: 1.5px; color: var(--gp-fg-3);
+    text-transform:uppercase; background: rgba(14,165,233,.05);
+  }
+  .badge-pill.live { color: var(--gp-success); border-color: var(--gp-success); }
+  .badge-pill.live .dot { width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow: 0 0 8px currentColor; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% {opacity:1;} 50% {opacity:.4;} }
+
+  h1 { font-family: var(--gp-font-display); font-weight:700; font-size: 80px; line-height: .98; letter-spacing: -1px; text-wrap: balance; }
+  h1 .stop { display:block; color: var(--gp-fg-1); }
+  h1 .start { display:block; }
+  h1 .start-grad { background: linear-gradient(90deg, #0EA5E9, #D946EF); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h1 .glitch { position: relative; display: inline-block; }
+  h1 .glitch::after { content: attr(data-t); position: absolute; left: 2px; top: 0; color: rgba(217,70,239,.5); mix-blend-mode: screen; clip-path: inset(40% 0 30% 0); }
+
+  .lede { font-family: var(--gp-font-body); font-size: 19px; line-height: 1.55; color: var(--gp-fg-2); margin: 28px 0 36px; max-width: 540px; }
+  .lede b { color: var(--gp-fg-1); font-weight: 600; }
+
+  .ctas { display:flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, rgba(217,70,239,.7), rgba(14,165,233,.7));
+    color: #fff; border: 1px solid rgba(255,255,255,.25);
+    padding: 16px 28px; border-radius: 4px;
+    font-family: var(--gp-font-display); font-weight:700; font-size: 16px; letter-spacing: 1.5px;
+    text-transform: uppercase; cursor: pointer; box-shadow: 0 0 24px rgba(217,70,239,.3);
+    display: inline-flex; align-items:center; gap: 10px; text-decoration:none;
+  }
+  .btn-primary:hover { box-shadow: 0 0 32px rgba(217,70,239,.55); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent; color: var(--gp-fg-2);
+    border: 1px solid var(--gp-border-strong);
+    padding: 16px 24px; border-radius: 4px;
+    font-family: var(--gp-font-display); font-weight:700; font-size: 16px; letter-spacing: 1.5px;
+    text-transform: uppercase; cursor: pointer; display:inline-flex; align-items:center; gap:10px; text-decoration:none;
+  }
+
+  .hero-meta { margin-top: 36px; display:flex; gap: 28px; flex-wrap: wrap; }
+  .hero-meta .stat { display:flex; flex-direction:column; gap:4px; }
+  .hero-meta .stat-num { font-family: var(--gp-font-display); font-weight:700; font-size: 28px; color: var(--gp-fg-1); line-height: 1; }
+  .hero-meta .stat-num em { color: var(--gp-primary); font-style: normal; }
+  .hero-meta .stat-label { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; }
+
+  /* ===== HERO MOCK PANEL ===== */
+  .mock {
+    background: rgba(15,23,42,.7); border: 1px solid var(--gp-border-strong); border-radius: 8px;
+    backdrop-filter: blur(16px); padding: 18px;
+    box-shadow: 0 0 60px rgba(14,165,233,.2), 0 0 80px rgba(217,70,239,.15);
+    position: relative;
+  }
+  .mock::before {
+    content: ""; position: absolute; inset: -1px; border-radius: 8px; pointer-events: none;
+    background: linear-gradient(135deg, rgba(217,70,239,.4), transparent 30%, transparent 70%, rgba(14,165,233,.4));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; padding:1px;
+  }
+  .mock-head { display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px; padding: 0 4px; }
+  .mock-head .left { display:flex; align-items:center; gap:10px; }
+  .mock-head .ttl { font-family: var(--gp-font-display); font-weight:700; font-size: 13px; letter-spacing:1.5px; text-transform:uppercase; color: var(--gp-fg-1); }
+  .mock-head .live { display:inline-flex; align-items:center; gap:6px; font-family: var(--gp-font-mono); font-size:10px; color: var(--gp-success); letter-spacing:1.5px; text-transform:uppercase; }
+  .mock-head .live .dot { width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor; animation:pulse 2s infinite; }
+  .mock-head .timer { font-family: var(--gp-font-mono); font-size: 12px; color: var(--gp-fg-3); }
+  .mock-head .timer em { color: var(--gp-warning); font-style: normal; }
+
+  .mock-screen {
+    aspect-ratio: 16/10; border-radius: 4px; position: relative; overflow:hidden;
+    background:
+      radial-gradient(circle at 40% 60%, rgba(14,165,233,.2), transparent 50%),
+      radial-gradient(circle at 70% 30%, rgba(217,70,239,.18), transparent 45%),
+      linear-gradient(135deg, #0c1627 0%, #050B14 100%);
+    box-shadow: inset 0 0 0 2px var(--gp-accent), inset 0 0 30px rgba(0,0,0,.6);
+  }
+  /* Stylized "in-game" mock — boss silhouette + HP bars */
+  .mock-screen .hpbar { position:absolute; top: 16px; left: 16px; width: 40%; }
+  .mock-screen .hpbar .lbl { font-family: var(--gp-font-mono); font-size: 9px; color: rgba(255,255,255,.7); letter-spacing:1.5px; text-transform:uppercase; margin-bottom: 4px; }
+  .mock-screen .hpbar .bar { height:6px; background: rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.2); }
+  .mock-screen .hpbar.boss .bar div { width: 32%; height: 100%; background: linear-gradient(90deg, #F43F5E, #F59E0B); }
+  .mock-screen .hpbar.you { left:auto; right: 16px; }
+  .mock-screen .hpbar.you .lbl { text-align: right; }
+  .mock-screen .hpbar.you .bar div { width: 78%; height: 100%; background: linear-gradient(90deg, #10B981, #0EA5E9); }
+  .mock-screen .silhouette {
+    position:absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 240px; height: 60%;
+    background: radial-gradient(ellipse at 50% 30%, #1e1320 0%, #0a0a14 70%);
+    clip-path: polygon(40% 0%, 60% 0%, 70% 30%, 80% 100%, 20% 100%, 30% 30%);
+    filter: drop-shadow(0 -10px 20px rgba(217,70,239,.3));
+  }
+  .mock-screen .crosshair {
+    position:absolute; top: 38%; left: 50%; transform: translate(-50%,-50%);
+    width: 80px; height: 80px;
+    border: 1px solid rgba(217,70,239,.7);
+    box-shadow: 0 0 20px rgba(217,70,239,.4), inset 0 0 12px rgba(217,70,239,.2);
+  }
+  .mock-screen .crosshair::before, .mock-screen .crosshair::after { content: ""; position:absolute; background: rgba(217,70,239,.7); }
+  .mock-screen .crosshair::before { top:50%; left:0; right:0; height:1px; }
+  .mock-screen .crosshair::after { left:50%; top:0; bottom:0; width:1px; }
+  .mock-screen .label-target {
+    position:absolute; left: calc(50% + 50px); top: 30%;
+    font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-accent); letter-spacing: 1.5px; text-transform: uppercase;
+    white-space: nowrap; padding: 3px 6px; background: rgba(0,0,0,.6); border:1px solid rgba(217,70,239,.5);
+  }
+
+  .mock-foot {
+    margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+  }
+  .stat-cell { padding: 10px 12px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 4px; }
+  .stat-cell .k { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; }
+  .stat-cell .v { font-family: var(--gp-font-display); font-weight: 700; font-size: 16px; color: var(--gp-fg-1); margin-top: 2px; }
+  .stat-cell .v em { font-style: normal; color: var(--gp-primary); }
+
+  /* ===== EYEBROW HEADERS ===== */
+  .eyebrow { font-family: var(--gp-font-mono); font-size: 11px; letter-spacing: 3px; color: var(--gp-primary); text-transform: uppercase; margin-bottom: 16px; }
+  h2 { font-family: var(--gp-font-display); font-weight: 700; font-size: 56px; line-height: 1.05; letter-spacing: -.5px; max-width: 800px; text-wrap: balance; }
+  h2 .accent { color: var(--gp-accent); }
+  .sub { font-family: var(--gp-font-body); font-size: 17px; line-height: 1.55; color: var(--gp-fg-3); max-width: 620px; margin-top: 18px; }
+
+  /* ===== AUTOPILOT MODES ===== */
+  .modes { display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 56px; }
+  .mode-card {
+    position: relative; padding: 24px; border-radius: 4px;
+    background: rgba(15,23,42,.6); border: 1px solid var(--gp-border);
+    backdrop-filter: blur(8px); display:flex; flex-direction: column; gap: 14px;
+    transition: all 200ms cubic-bezier(.2,.8,.2,1);
+  }
+  .mode-card:hover { transform: translateY(-2px); border-color: var(--gp-border-glow); box-shadow: 0 0 24px rgba(14,165,233,.2); }
+  .mode-card .ico { width: 44px; height: 44px; border-radius: 4px; display:flex; align-items:center; justify-content:center; }
+  .mode-card .ico i { width: 22px; height: 22px; }
+  .mode-card.boss .ico  { background: rgba(14,165,233,.1); border:1px solid rgba(14,165,233,.4); color:#0EA5E9; }
+  .mode-card.alive .ico { background: rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.4); color:#10B981; }
+  .mode-card.build .ico { background: rgba(217,70,239,.1); border:1px solid rgba(217,70,239,.4); color:#D946EF; }
+  .mode-card.farm .ico  { background: rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.4); color:#F59E0B; }
+  .mode-card h3 { font-family: var(--gp-font-display); font-weight:700; font-size: 22px; letter-spacing:1px; text-transform: uppercase; color: var(--gp-fg-1); }
+  .mode-card .quote { font-family: var(--gp-font-body); font-size: 14px; line-height: 1.55; color: var(--gp-fg-3); }
+  .mode-card .quote b { color: var(--gp-fg-1); font-weight: 600; }
+  .mode-card .meta { display:flex; gap:6px; flex-wrap: wrap; margin-top: 4px; }
+  .mode-card .tag { font-family: var(--gp-font-mono); font-size: 9px; padding: 2px 6px; border:1px solid var(--gp-border); border-radius: 2px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; }
+
+  /* ===== HOW IT WORKS ===== */
+  .how { display:grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+  .step { padding: 24px; border-left: 2px solid var(--gp-primary); position: relative; }
+  .step .num { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; letter-spacing: 2px; color: var(--gp-primary); }
+  .step h4 { font-family: var(--gp-font-display); font-weight: 700; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); margin-top: 8px; }
+  .step p { font-family: var(--gp-font-body); font-size: 14px; line-height: 1.6; color: var(--gp-fg-3); margin-top: 12px; }
+  .step p b { color: var(--gp-fg-1); font-weight: 600; }
+
+  /* ===== SAFETY STRIP ===== */
+  .safety {
+    position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 0 48px;
+  }
+  .safety-inner {
+    border: 1px solid rgba(16,185,129,.3); border-radius: 4px;
+    background: linear-gradient(135deg, rgba(16,185,129,.08), rgba(15,23,42,.6));
+    backdrop-filter: blur(12px);
+    padding: 48px;
+    display:grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: center;
+  }
+  .safety-inner .left { display: flex; flex-direction: column; gap: 16px; }
+  .safety-inner .left .eyebrow { color: var(--gp-success); margin: 0; }
+  .safety-inner h3 { font-family: var(--gp-font-display); font-weight: 700; font-size: 40px; line-height: 1.05; }
+  .safety-inner h3 .green { color: var(--gp-success); }
+  .safety-inner .right { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .safety-pill { display:flex; align-items:flex-start; gap: 12px; padding: 14px; background: rgba(0,0,0,.3); border:1px solid var(--gp-border); border-radius: 4px; }
+  .safety-pill .ic { width: 32px; height: 32px; flex-shrink: 0; border-radius: 4px; background: rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); display:flex; align-items:center; justify-content:center; color: var(--gp-success); }
+  .safety-pill .ic i { width: 16px; height: 16px; }
+  .safety-pill .t { font-family: var(--gp-font-display); font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); }
+  .safety-pill .d { font-family: var(--gp-font-body); font-size: 12px; line-height: 1.5; color: var(--gp-fg-3); margin-top: 4px; }
+
+  /* ===== FAQ / CTA ===== */
+  .ctaband {
+    text-align:center; padding-top: 80px; padding-bottom: 80px;
+  }
+  .ctaband h2 { margin: 0 auto; }
+  .ctaband .ctas { justify-content: center; margin-top: 36px; }
+
+  footer {
+    border-top: 1px solid var(--gp-border);
+    padding: 28px 48px; display:flex; justify-content: space-between; align-items:center;
+    font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase;
+    position: relative; z-index: 1;
+  }
+  footer .left { display:flex; align-items:center; gap:14px; }
+  footer img { height: 22px; opacity: .7; }
+  footer a { color: var(--gp-fg-3); text-decoration: none; margin-left: 24px; }
+  footer a:hover { color: var(--gp-primary); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><img src="/static/logo-wordmark.svg" alt="GamePilot"/></div>
+  <ul>
+    <li><a href="#modes">Modes</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#safety">Safety</a></li>
+    <li><a href="#">Discord</a></li>
+  </ul>
+  <a href="#" class="btn-cta">Get the beta</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="badge-row">
+        <span class="badge-pill live"><span class="dot"></span>Beta · invite-only</span>
+        <span class="badge-pill">Single-player only</span>
+        <span class="badge-pill">v0.1.0</span>
+      </div>
+      <h1>
+        <span class="stop">Stop rage</span>
+        <span class="stop"><span class="glitch" data-t="quitting.">quitting.</span></span>
+        <span class="start"><span class="start-grad">Start winning.</span></span>
+      </h1>
+      <p class="lede">
+        Stuck on a boss? Need to AFK? Hate grinding? <b>GamePilot is your AI gaming buddy</b> — it watches, it advises, and when you ask it to, it picks up the controller. <b>Single-player only. You set the time. Stop is one hotkey away.</b>
+      </p>
+      <div class="ctas">
+        <a href="#" class="btn-primary"><i data-lucide="zap"></i>Get the beta</a>
+        <a href="#" class="btn-ghost"><i data-lucide="play"></i>Watch 60s demo</a>
+      </div>
+      <div class="hero-meta">
+        <div class="stat"><span class="stat-num"><em>2,431</em></span><span class="stat-label">Bosses beaten · last 24h</span></div>
+        <div class="stat"><span class="stat-num"><em>41</em>ms</span><span class="stat-label">Avg vision latency</span></div>
+        <div class="stat"><span class="stat-num"><em>0</em></span><span class="stat-label">Multiplayer matches touched</span></div>
+      </div>
+    </div>
+
+    <div class="mock">
+      <div class="mock-head">
+        <div class="left">
+          <span class="ttl">Autopilot · Beat Boss</span>
+          <span class="live"><span class="dot"></span>Engaged</span>
+        </div>
+        <div class="timer">07:24 / <em>15:00</em></div>
+      </div>
+      <div class="mock-screen">
+        <div class="hpbar boss">
+          <div class="lbl">Malenia · phase 2</div>
+          <div class="bar"><div></div></div>
+        </div>
+        <div class="hpbar you">
+          <div class="lbl">You</div>
+          <div class="bar"><div></div></div>
+        </div>
+        <div class="silhouette"></div>
+        <div class="crosshair"></div>
+        <div class="label-target">DODGE_RIGHT · 0.92</div>
+      </div>
+      <div class="mock-foot">
+        <div class="stat-cell"><div class="k">Attempts</div><div class="v"><em>4</em>/12</div></div>
+        <div class="stat-cell"><div class="k">Avg DPS</div><div class="v">312</div></div>
+        <div class="stat-cell"><div class="k">Latency</div><div class="v"><em>41</em>ms</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modes">
+  <div class="eyebrow">// Autopilot scenarios</div>
+  <h2>Hand the controller to AI <span class="accent">when you want to,</span> take it back when you want to.</h2>
+  <p class="sub">Four modes for the situations every PC gamer knows. You set the time cap. AI does the boring / brutal / tedious part. You watch, learn, or eat pizza.</p>
+  <div class="modes">
+    <div class="mode-card boss">
+      <div class="ico"><i data-lucide="swords"></i></div>
+      <h3>Beat Boss</h3>
+      <p class="quote">"Boss killed you 50 times? <b>Hand the controller to AI.</b> Watch it learn the pattern. Take notes. Try again."</p>
+      <div class="meta"><span class="tag">⏱ 5–60 min</span><span class="tag">Souls-likes</span></div>
+    </div>
+    <div class="mode-card alive">
+      <div class="ico"><i data-lucide="shield"></i></div>
+      <h3>Stay Alive</h3>
+      <p class="quote">"Pizza's here. <b>Don't die while you eat.</b> AI plays defense — runs, dodges, retreats. Never advances."</p>
+      <div class="meta"><span class="tag">⏱ Until you're back</span><span class="tag">Open-world</span></div>
+    </div>
+    <div class="mode-card build">
+      <div class="ico"><i data-lucide="hammer"></i></div>
+      <h3>Build</h3>
+      <p class="quote">"Show AI a screenshot of the castle you want. <b>AI builds it.</b> Block by block. You sip coffee."</p>
+      <div class="meta"><span class="tag">Sandbox</span><span class="tag">Minecraft · Valheim</span></div>
+    </div>
+    <div class="mode-card farm">
+      <div class="ico"><i data-lucide="pickaxe"></i></div>
+      <h3>Farm Resources</h3>
+      <p class="quote">"Grinding is a second job. Set a timer. <b>AI farms ore / pelts / souls.</b> Your wrist thanks you."</p>
+      <div class="meta"><span class="tag">⏱ 30 min default</span><span class="tag">RPG · Survival</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="eyebrow">// How it works</div>
+  <h2>Just <span class="accent">keyboard and mouse.</span> No memory injection. No file modification.</h2>
+  <p class="sub">GamePilot looks at your screen, thinks, and presses keys — exactly like a person. It runs on your machine. It can't read game memory. It can't talk to servers it isn't supposed to.</p>
+  <div class="how">
+    <div class="step">
+      <div class="num">// 01</div>
+      <h4>Watch</h4>
+      <p>A vision model reads <b>your screen</b> at 24 fps. It sees what you see — HP bars, enemy positions, prompts.</p>
+    </div>
+    <div class="step">
+      <div class="num">// 02</div>
+      <h4>Decide</h4>
+      <p>An action model picks the next move — <b>dodge, attack, build, mine</b> — and rates its confidence.</p>
+    </div>
+    <div class="step">
+      <div class="num">// 03</div>
+      <h4>Act</h4>
+      <p>It presses keys. <b>Ctrl + Shift + Esc</b> hands control back to you instantly. Always. No matter what.</p>
+    </div>
+  </div>
+</section>
+
+<section id="safety" class="safety">
+  <div class="safety-inner">
+    <div class="left">
+      <div class="eyebrow">// Safety first</div>
+      <h3>Your game. Your time. <span class="green">Your choice.</span></h3>
+      <p class="sub" style="margin: 0;">GamePilot is built to keep gaming fun, not to ship cheats. The whole product is wrapped in guardrails most people will never need to think about — because they're the default.</p>
+    </div>
+    <div class="right">
+      <div class="safety-pill">
+        <div class="ic"><i data-lucide="octagon-x"></i></div>
+        <div><div class="t">Emergency Stop</div><div class="d">Ctrl + Shift + Esc. One hotkey. Always armed.</div></div>
+      </div>
+      <div class="safety-pill">
+        <div class="ic"><i data-lucide="timer"></i></div>
+        <div><div class="t">Time caps</div><div class="d">Default 10 min, hard cap 60. You set it. We enforce it.</div></div>
+      </div>
+      <div class="safety-pill">
+        <div class="ic"><i data-lucide="user-x"></i></div>
+        <div><div class="t">Single-player only</div><div class="d">Multiplayer and ranked are blocked by design.</div></div>
+      </div>
+      <div class="safety-pill">
+        <div class="ic"><i data-lucide="terminal"></i></div>
+        <div><div class="t">Transparent logs</div><div class="d">Every keypress AI made — visible, exportable, auditable.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ctaband">
+  <div class="eyebrow">// Get the beta</div>
+  <h2 style="text-align:center;">Gaming should be fun, <span class="accent">not a second job.</span></h2>
+  <p class="sub" style="margin: 24px auto 0;">Windows-only, invite-based beta. We're rolling out slowly — Souls-likes, sandbox, RPG first.</p>
+  <div class="ctas">
+    <a href="#" class="btn-primary"><i data-lucide="zap"></i>Request invite</a>
+    <a href="#" class="btn-ghost"><i data-lucide="star"></i>Star on GitHub</a>
+  </div>
+</section>
+
+<footer>
+  <div class="left"><img src="/static/logo-wordmark.svg" alt="GamePilot"/><span>v0.1.0-BETA · Windows · Single-player</span></div>
+  <div><a href="#">Safety</a><a href="#">Privacy</a><a href="#">Discord</a><a href="#">GitHub</a></div>
+</footer>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

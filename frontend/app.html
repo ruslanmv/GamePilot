@@ -1,0 +1,1356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GamePilot — App</title>
+<link rel="stylesheet" href="/static/colors_and_type.css"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--gp-bg-deep); color: var(--gp-fg-1); font-family: var(--gp-font-body); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  body {
+    background-image:
+      linear-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14, 165, 233, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    position: relative;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; background: radial-gradient(ellipse at 80% 0%, rgba(217,70,239,.10), transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(14,165,233,.08), transparent 50%); z-index: 0; }
+
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* SIDEBAR */
+  aside {
+    background: rgba(20,30,46,.85); backdrop-filter: blur(16px);
+    border-right: 1px solid var(--gp-border); padding: 20px 16px;
+    display:flex; flex-direction:column; gap: 6px; position: sticky; top:0; height: 100vh;
+  }
+  .brand { display:flex; align-items:center; gap:8px; padding: 4px 8px 18px; border-bottom: 1px solid var(--gp-border); margin-bottom: 14px; }
+  .brand img { height: 26px; }
+  .brand .ver { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing:1.5px; padding: 2px 5px; border:1px solid var(--gp-border); border-radius: 2px; margin-left: auto; }
+
+  .nav-section { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 2px; text-transform: uppercase; padding: 16px 8px 8px; }
+
+  .nav-item {
+    display:flex; align-items:center; gap: 12px; padding: 10px 12px;
+    border-radius: 4px; cursor: pointer; color: var(--gp-fg-3);
+    font-family: var(--gp-font-display); font-weight: 600; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;
+    transition: all 200ms cubic-bezier(.2,.8,.2,1); border: 1px solid transparent;
+  }
+  .nav-item i { width: 18px; height: 18px; }
+  .nav-item:hover { background: rgba(14,165,233,.06); color: var(--gp-fg-1); }
+  .nav-item.active { background: rgba(14,165,233,.12); color: var(--gp-primary); border-color: rgba(14,165,233,.4); box-shadow: inset 2px 0 0 var(--gp-primary); }
+
+  .sidebar-foot { margin-top: auto; padding: 12px 8px; border-top: 1px solid var(--gp-border); display:flex; align-items:center; gap: 10px; }
+  .avatar { width: 32px; height: 32px; border-radius: 4px; background: linear-gradient(135deg, #0EA5E9, #D946EF); display:flex; align-items:center; justify-content:center; font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; color: #fff; }
+  .sidebar-foot .who { display:flex; flex-direction: column; gap: 1px; }
+  .sidebar-foot .name { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; color: var(--gp-fg-1); letter-spacing:.5px; }
+  .sidebar-foot .meta { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-success); letter-spacing: 1px; text-transform: uppercase; }
+
+  /* MAIN */
+  main { padding: 24px 32px 48px; }
+  .page-head { display:flex; align-items:flex-end; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid var(--gp-border); margin-bottom: 28px; }
+  .page-head .left { display:flex; flex-direction: column; gap: 4px; }
+  .page-head .crumb { font-family: var(--gp-font-mono); font-size: 11px; letter-spacing: 2px; color: var(--gp-primary); text-transform: uppercase; }
+  .page-head h1 { font-family: var(--gp-font-display); font-weight: 700; font-size: 36px; line-height: 1; letter-spacing: -.5px; color: var(--gp-fg-1); }
+  .page-head .right { display:flex; align-items: center; gap: 12px; }
+  .pill {
+    display:inline-flex; align-items:center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px; border:1px solid var(--gp-border);
+    font-family: var(--gp-font-mono); font-size: 10px; letter-spacing: 1.5px; color: var(--gp-fg-3); text-transform: uppercase;
+  }
+  .pill.live { border-color: var(--gp-success); color: var(--gp-success); background: rgba(16,185,129,.08); }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+  .btn { font-family: var(--gp-font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 9px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent; display:inline-flex; align-items:center; gap: 8px; }
+  .btn i { width: 14px; height: 14px; }
+  .btn-primary { background: rgba(14,165,233,.15); color: var(--gp-primary); border-color: var(--gp-primary); }
+  .btn-primary:hover { box-shadow: 0 0 16px rgba(14,165,233,.4); }
+  .btn-engage { background: linear-gradient(135deg, rgba(217,70,239,.7), rgba(14,165,233,.7)); color:#fff; border-color: rgba(255,255,255,.25); box-shadow: 0 0 18px rgba(217,70,239,.3); }
+  .btn-ghost { background: transparent; color: var(--gp-fg-3); border-color: var(--gp-border-strong); }
+  .btn-danger { background: rgba(244,63,94,.1); color: var(--gp-danger); border-color: var(--gp-danger); }
+
+  /* SHARED CARD */
+  .card { background: rgba(15,23,42,.6); border:1px solid var(--gp-border); border-radius: 4px; backdrop-filter: blur(8px); padding: 20px; }
+  .card .h4 { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-1); display:flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .card .h4 .right { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1.5px; }
+
+  /* ============ DASHBOARD ============ */
+  .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .stat-card { padding: 18px 20px; }
+  .stat-card .k { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; }
+  .stat-card .v { font-family: var(--gp-font-display); font-weight: 700; font-size: 36px; color: var(--gp-fg-1); line-height: 1; margin-top: 8px; }
+  .stat-card .v em { font-style: normal; color: var(--gp-primary); }
+  .stat-card .d { font-family: var(--gp-font-body); font-size: 11px; color: var(--gp-fg-3); margin-top: 8px; }
+  .stat-card .d em { font-style: normal; color: var(--gp-success); }
+
+  .dash-row { display:grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-top: 16px; }
+
+  .modes-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mode-tile { padding: 16px; border:1px solid var(--gp-border); border-radius: 4px; background: rgba(0,0,0,.3); cursor: pointer; display:flex; flex-direction: column; gap: 10px; transition: all 200ms cubic-bezier(.2,.8,.2,1); }
+  .mode-tile:hover { border-color: var(--gp-border-glow); box-shadow: 0 0 16px rgba(14,165,233,.2); }
+  .mode-tile.featured { border-color: var(--gp-primary); box-shadow: 0 0 24px rgba(14,165,233,.18); background: rgba(14,165,233,.05); }
+  .mode-tile .head { display:flex; align-items: center; justify-content: space-between; }
+  .mode-tile .head .ico { width: 36px; height: 36px; border-radius: 4px; display:flex; align-items: center; justify-content: center; }
+  .mode-tile .head .ico i { width: 18px; height: 18px; }
+  .mode-tile.boss .ico  { background: rgba(14,165,233,.12); border:1px solid rgba(14,165,233,.4); color: #0EA5E9; }
+  .mode-tile.alive .ico { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.4); color: #10B981; }
+  .mode-tile.build .ico { background: rgba(217,70,239,.12); border:1px solid rgba(217,70,239,.4); color: #D946EF; }
+  .mode-tile.farm .ico  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.4); color: #F59E0B; }
+  .mode-tile h3 { font-family: var(--gp-font-display); font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); }
+  .mode-tile p { font-family: var(--gp-font-body); font-size: 12px; line-height: 1.5; color: var(--gp-fg-3); }
+  .mode-tile .meta { display:flex; gap: 6px; flex-wrap: wrap; }
+  .mode-tile .tag { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing: 1.5px; padding: 2px 6px; border:1px solid var(--gp-border); border-radius: 2px; text-transform: uppercase; }
+
+  .recent-item { display:flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gp-border); }
+  .recent-item:last-child { border-bottom: none; }
+  .recent-item .game { width: 36px; height: 36px; border-radius: 4px; background: linear-gradient(135deg, #1e293b, #0f172a); border:1px solid var(--gp-border); display:flex; align-items:center; justify-content:center; color: var(--gp-fg-3); }
+  .recent-item .game i { width: 18px; height: 18px; }
+  .recent-item .info { flex:1; display:flex; flex-direction: column; gap: 2px; }
+  .recent-item .ttl { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; color: var(--gp-fg-1); letter-spacing: .5px; }
+  .recent-item .meta { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1px; text-transform: uppercase; }
+  .recent-item .res { font-family: var(--gp-font-mono); font-size: 11px; letter-spacing: 1.5px; padding: 3px 8px; border-radius: 2px; }
+  .res.win { color: var(--gp-success); border:1px solid var(--gp-success); background: rgba(16,185,129,.08); }
+  .res.fail { color: var(--gp-danger); border:1px solid var(--gp-danger); background: rgba(244,63,94,.08); }
+  .res.run { color: var(--gp-primary); border:1px solid var(--gp-primary); background: rgba(14,165,233,.08); }
+
+  /* ============ AUTOPILOT SETUP ============ */
+  .ap-grid { display:grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .ap-screen { aspect-ratio: 16/10; border-radius: 8px; position: relative; overflow:hidden;
+    background: radial-gradient(circle at 40% 60%, rgba(14,165,233,.18), transparent 50%), radial-gradient(circle at 70% 30%, rgba(217,70,239,.18), transparent 45%), linear-gradient(135deg, #0c1627 0%, #050B14 100%);
+    box-shadow: inset 0 0 0 2px var(--gp-accent), inset 0 0 30px rgba(0,0,0,.6);
+  }
+  .ap-screen .corner { position: absolute; width: 16px; height: 16px; border: 2px solid var(--gp-accent); }
+  .ap-screen .corner.tl { top:8px; left:8px; border-right:none; border-bottom:none; }
+  .ap-screen .corner.tr { top:8px; right:8px; border-left:none; border-bottom:none; }
+  .ap-screen .corner.bl { bottom:8px; left:8px; border-right:none; border-top:none; }
+  .ap-screen .corner.br { bottom:8px; right:8px; border-left:none; border-top:none; }
+  .ap-screen .ohlay-ttl { position:absolute; top: 14px; left: 50%; transform: translateX(-50%); font-family: var(--gp-font-mono); font-size: 11px; letter-spacing: 2px; color: var(--gp-accent); text-transform: uppercase; padding: 4px 10px; background: rgba(0,0,0,.6); border:1px solid rgba(217,70,239,.4); }
+  .ap-screen .silhouette { position:absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 280px; height: 65%; background: radial-gradient(ellipse at 50% 30%, #1e1320 0%, #0a0a14 70%); clip-path: polygon(40% 0%, 60% 0%, 70% 30%, 80% 100%, 20% 100%, 30% 30%); filter: drop-shadow(0 -10px 20px rgba(217,70,239,.3)); }
+  .ap-screen .crosshair { position:absolute; top: 38%; left: 50%; transform: translate(-50%,-50%); width: 80px; height: 80px; border: 1px solid rgba(217,70,239,.7); box-shadow: 0 0 20px rgba(217,70,239,.4); }
+  .ap-screen .crosshair::before, .ap-screen .crosshair::after { content:""; position:absolute; background: rgba(217,70,239,.7); }
+  .ap-screen .crosshair::before { top:50%; left:0; right:0; height:1px; }
+  .ap-screen .crosshair::after { left:50%; top:0; bottom:0; width:1px; }
+  .ap-screen .hpbar { position:absolute; top: 38px; left: 16px; width: 35%; }
+  .ap-screen .hpbar .lbl { font-family: var(--gp-font-mono); font-size: 9px; color: rgba(255,255,255,.7); letter-spacing:1.5px; text-transform:uppercase; margin-bottom: 4px; }
+  .ap-screen .hpbar .bar { height:6px; background: rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.2); }
+  .ap-screen .hpbar .bar div { width: 32%; height: 100%; background: linear-gradient(90deg, #F43F5E, #F59E0B); }
+
+  .ap-controls { display:flex; flex-direction: column; gap: 12px; }
+  .ap-form-row { display: flex; flex-direction: column; gap: 6px; }
+  .ap-form-row label { font-family: var(--gp-font-mono); font-size: 10px; letter-spacing: 2px; color: var(--gp-fg-3); text-transform: uppercase; }
+  .ap-form-row select, .ap-form-row input[type=text] { background: rgba(0,0,0,.3); border: 1px solid var(--gp-border); color: var(--gp-fg-1); padding: 10px 12px; border-radius: 4px; font-family: var(--gp-font-mono); font-size: 12px; }
+
+  .slider-wrap { display:flex; align-items: center; gap: 14px; }
+  .slider-wrap .track { flex:1; height: 4px; background: rgba(255,255,255,.06); border-radius: 2px; position: relative; }
+  .slider-wrap .fill { height: 100%; width: 35%; background: linear-gradient(90deg, var(--gp-success), var(--gp-warning)); border-radius: 2px; }
+  .slider-wrap .thumb { position: absolute; left: 35%; top:50%; transform: translate(-50%,-50%); width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px var(--gp-warning); }
+  .slider-wrap .val { font-family: var(--gp-font-display); font-weight: 700; font-size: 22px; color: var(--gp-fg-1); min-width: 80px; text-align: right; }
+  .slider-wrap .val em { font-style: normal; color: var(--gp-warning); }
+
+  .preflight { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.3); border-radius: 4px; padding: 14px; display:flex; flex-direction: column; gap: 8px; }
+  .preflight .row { display:flex; align-items: center; gap: 10px; font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-2); letter-spacing:.5px; }
+  .preflight .row .ic { width: 14px; height: 14px; color: var(--gp-success); }
+  .preflight .row .ic i { width: 14px; height: 14px; }
+
+  .engage-bar {
+    margin-top: 8px; display:flex; gap: 10px; align-items: center; padding: 16px; border-radius: 4px;
+    background: linear-gradient(135deg, rgba(217,70,239,.12), rgba(14,165,233,.12)); border: 1px solid rgba(217,70,239,.3);
+  }
+  .engage-bar .info { flex:1; }
+  .engage-bar .info .t { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); }
+  .engage-bar .info .d { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1px; margin-top: 4px; }
+
+  /* ============ COACH ============ */
+  .coach-grid { display:grid; grid-template-columns: 1.2fr 1.6fr; gap: 20px; height: calc(100vh - 200px); min-height: 620px; }
+  .coach-feed { padding: 18px; display:flex; flex-direction: column; gap: 14px; }
+  .coach-screen { aspect-ratio: 16/10; border-radius: 4px; position: relative; overflow: hidden;
+    background: radial-gradient(circle at 30% 60%, rgba(14,165,233,.2), transparent 50%), linear-gradient(135deg, #0c1627 0%, #050B14 100%);
+    box-shadow: inset 0 0 0 2px var(--gp-accent), inset 0 0 30px rgba(0,0,0,.6);
+  }
+  .coach-screen .silhouette { position:absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 220px; height: 60%; background: radial-gradient(ellipse at 50% 30%, #14181f 0%, #050B14 70%); clip-path: polygon(40% 0%, 60% 0%, 70% 30%, 80% 100%, 20% 100%, 30% 30%); }
+  .coach-screen .crosshair { position:absolute; top: 40%; left: 50%; transform: translate(-50%,-50%); width: 60px; height: 60px; border: 1px solid rgba(14,165,233,.7); box-shadow: 0 0 14px rgba(14,165,233,.4); }
+  .coach-screen .crosshair::before, .coach-screen .crosshair::after { content:""; position:absolute; background: rgba(14,165,233,.7); }
+  .coach-screen .crosshair::before { top:50%; left:0; right:0; height:1px; }
+  .coach-screen .crosshair::after { left:50%; top:0; bottom:0; width:1px; }
+  .coach-vision-meta { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .stat-cell { padding: 10px 12px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 4px; }
+  .stat-cell .k { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; }
+  .stat-cell .v { font-family: var(--gp-font-display); font-weight: 700; font-size: 16px; color: var(--gp-fg-1); margin-top: 2px; }
+  .stat-cell .v em { font-style: normal; color: var(--gp-primary); }
+
+  .chat { display:flex; flex-direction: column; padding: 0; overflow: hidden; }
+  .chat-head { padding: 16px 20px; border-bottom: 1px solid var(--gp-border); display:flex; align-items: center; justify-content: space-between; }
+  .chat-head .who { display:flex; align-items: center; gap: 10px; }
+  .chat-head .ai { width: 32px; height: 32px; border-radius: 4px; background: linear-gradient(135deg, #0EA5E9, #D946EF); display:flex; align-items:center; justify-content:center; color: #fff; box-shadow: 0 0 12px rgba(217,70,239,.4); }
+  .chat-head .ai i { width: 18px; height: 18px; }
+  .chat-head .name { font-family: var(--gp-font-display); font-weight: 700; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: var(--gp-fg-1); }
+  .chat-head .stat-line { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-success); letter-spacing: 1.5px; text-transform: uppercase; }
+  .chat-body { flex:1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .msg { max-width: 80%; }
+  .msg .meta { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .msg.ai .bubble { background: rgba(14,165,233,.08); border:1px solid rgba(14,165,233,.3); border-radius: 4px; padding: 12px 14px; font-family: var(--gp-font-body); font-size: 13.5px; line-height: 1.55; color: var(--gp-fg-1); }
+  .msg.ai .bubble b { color: var(--gp-primary); font-weight: 600; }
+  .msg.ai .bubble code { font-family: var(--gp-font-mono); background: rgba(0,0,0,.4); padding: 1px 5px; border-radius: 2px; color: var(--gp-accent); font-size: 12px; }
+  .msg.user { align-self: flex-end; }
+  .msg.user .bubble { background: rgba(217,70,239,.08); border:1px solid rgba(217,70,239,.3); border-radius: 4px; padding: 12px 14px; font-family: var(--gp-font-body); font-size: 13.5px; line-height: 1.55; color: var(--gp-fg-1); }
+  .msg.user .meta { text-align: right; color: var(--gp-accent); }
+  .msg.system .bubble { background: transparent; border: 1px dashed var(--gp-border); border-radius: 4px; padding: 8px 12px; font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-3); text-align: center; letter-spacing:1px; }
+  .msg.system { align-self: center; }
+
+  .quick-row { display:flex; gap: 8px; flex-wrap: wrap; padding: 0 20px 12px; }
+  .quick { font-family: var(--gp-font-mono); font-size: 10px; letter-spacing: 1.5px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--gp-border); color: var(--gp-fg-3); cursor: pointer; text-transform: uppercase; background: rgba(0,0,0,.3); }
+  .quick:hover { border-color: var(--gp-primary); color: var(--gp-primary); }
+  .chat-input { border-top: 1px solid var(--gp-border); padding: 12px 16px; display:flex; gap: 10px; align-items: center; }
+  .chat-input input { flex:1; background: rgba(0,0,0,.3); border:1px solid var(--gp-border); color: var(--gp-fg-1); padding: 10px 12px; border-radius: 4px; font-family: var(--gp-font-body); font-size: 14px; }
+  .chat-input input:focus { outline: none; border-color: var(--gp-primary); box-shadow: 0 0 10px rgba(14,165,233,.2); }
+  .chat-input button { background: rgba(14,165,233,.15); border:1px solid var(--gp-primary); color: var(--gp-primary); padding: 9px 12px; border-radius: 4px; cursor: pointer; }
+  .chat-input button i { width: 16px; height: 16px; }
+
+  /* ============ SAFETY ============ */
+  .safety-grid { display:grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
+  .stop-card { padding: 28px; border: 1px solid rgba(244,63,94,.4); background: linear-gradient(135deg, rgba(244,63,94,.08), rgba(15,23,42,.6)); }
+  .stop-row { display:flex; gap: 24px; align-items: center; }
+  .stop-icon { width: 96px; height: 96px; border-radius: 4px; border: 2px solid var(--gp-danger); background: rgba(244,63,94,.1); display:flex; align-items: center; justify-content: center; color: var(--gp-danger); flex-shrink: 0; box-shadow: 0 0 30px rgba(244,63,94,.3); animation: pulseStop 3s infinite; }
+  .stop-icon i { width: 48px; height: 48px; }
+  @keyframes pulseStop { 0%,100% { box-shadow: 0 0 30px rgba(244,63,94,.3); } 50% { box-shadow: 0 0 50px rgba(244,63,94,.5); } }
+  .stop-row .body h3 { font-family: var(--gp-font-display); font-weight: 700; font-size: 32px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); }
+  .stop-row .body p { font-family: var(--gp-font-body); font-size: 14px; line-height: 1.6; color: var(--gp-fg-2); margin-top: 8px; max-width: 480px; }
+  .stop-row .body p b { color: var(--gp-fg-1); }
+  .keys-row { display:flex; gap: 6px; margin-top: 14px; }
+  .key { padding: 6px 12px; background: rgba(0,0,0,.4); border: 1px solid var(--gp-border); border-radius: 4px; font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; color: var(--gp-fg-1); letter-spacing: 1px; text-transform: uppercase; box-shadow: inset 0 -2px 0 rgba(0,0,0,.4); }
+  .keys-row .plus { color: var(--gp-fg-3); align-self: center; font-family: var(--gp-font-mono); }
+
+  .toggles { display:flex; flex-direction: column; gap: 0; }
+  .toggle-row { padding: 16px 0; border-bottom: 1px solid var(--gp-border); display:flex; align-items: flex-start; gap: 14px; }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row .info { flex:1; }
+  .toggle-row .ttl { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); }
+  .toggle-row .desc { font-family: var(--gp-font-body); font-size: 12px; line-height: 1.5; color: var(--gp-fg-3); margin-top: 4px; }
+  .switch { width: 38px; height: 22px; border-radius: 999px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); position: relative; flex-shrink: 0; cursor: pointer; }
+  .switch.on { background: rgba(16,185,129,.2); border-color: var(--gp-success); }
+  .switch::after { content: ""; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--gp-fg-3); top: 3px; left: 3px; transition: 200ms cubic-bezier(.2,.8,.2,1); }
+  .switch.on::after { left: 19px; background: var(--gp-success); box-shadow: 0 0 8px var(--gp-success); }
+
+  .term { background: rgba(0,0,0,.6); border:1px solid var(--gp-border); border-radius: 4px; padding: 14px; font-family: var(--gp-font-mono); font-size: 11px; box-shadow: inset 0 0 20px rgba(0,0,0,.8); line-height: 1.7; max-height: 240px; overflow-y: auto; }
+  .term .line { display:flex; gap: 8px; align-items: baseline; }
+  .term .t { color: var(--gp-fg-4); }
+  .term .tag { padding: 1px 6px; border-radius: 3px; font-weight:700; font-size: 9px; letter-spacing: 1px; }
+  .tag.inf { background: rgba(14,165,233,.15); color: var(--gp-primary); }
+  .tag.sys { background: rgba(16,185,129,.15); color: var(--gp-success); }
+  .tag.err { background: rgba(244,63,94,.15); color: var(--gp-danger); }
+  .tag.warn { background: rgba(245,158,11,.15); color: var(--gp-warning); }
+  .term .msg { color: var(--gp-fg-2); }
+
+  /* SCREEN VISIBILITY */
+  .screen { display:none; }
+  .screen.active { display: block; }
+
+  /* ============ MODELS ============ */
+  .tabs { display:flex; gap: 4px; padding: 4px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 4px; margin-bottom: 24px; width: fit-content; }
+  .tab { padding: 8px 16px; border-radius: 3px; cursor: pointer; font-family: var(--gp-font-display); font-weight: 700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-3); display:inline-flex; align-items:center; gap: 8px; }
+  .tab i { width: 14px; height: 14px; }
+  .tab.active { background: rgba(14,165,233,.15); color: var(--gp-primary); box-shadow: inset 0 0 0 1px rgba(14,165,233,.4); }
+  .tab:hover:not(.active) { color: var(--gp-fg-1); }
+
+  /* INSTALLED MODELS — TABLE */
+  .models-table { width: 100%; border-collapse: collapse; font-family: var(--gp-font-body); }
+  .models-table th { text-align: left; padding: 12px 18px; font-family: var(--gp-font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-3); border-bottom: 1px solid var(--gp-border); background: rgba(0,0,0,.3); }
+  .models-table td { padding: 16px 18px; border-bottom: 1px solid var(--gp-border); font-size: 13px; color: var(--gp-fg-2); vertical-align: middle; }
+  .models-table tr:last-child td { border-bottom: none; }
+  .models-table tr:hover td { background: rgba(14,165,233,.04); }
+  .model-name { font-family: var(--gp-font-display); font-weight: 700; font-size: 14px; color: var(--gp-fg-1); letter-spacing:.3px; display:flex; align-items: center; gap: 10px; }
+  .model-name .v { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); padding: 2px 6px; border:1px solid var(--gp-border); border-radius: 2px; letter-spacing: 1px; }
+  .model-meta { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1px; margin-top: 4px; }
+  .type-badge { display:inline-flex; padding: 4px 10px; border-radius: 2px; font-family: var(--gp-font-mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; border:1px solid; }
+  .type-badge.action { color: #0EA5E9; border-color: rgba(14,165,233,.4); background: rgba(14,165,233,.08); }
+  .type-badge.vision { color: #D946EF; border-color: rgba(217,70,239,.4); background: rgba(217,70,239,.08); }
+  .type-badge.skill  { color: #10B981; border-color: rgba(16,185,129,.4); background: rgba(16,185,129,.08); }
+  .type-badge.policy { color: #F59E0B; border-color: rgba(245,158,11,.4); background: rgba(245,158,11,.08); }
+  .src { display:inline-flex; align-items:center; gap: 6px; font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1px; }
+  .src i { width: 12px; height: 12px; }
+  .status-pill { display:inline-flex; align-items:center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-family: var(--gp-font-mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .status-pill.active { color: var(--gp-success); border:1px solid var(--gp-success); background: rgba(16,185,129,.08); }
+  .status-pill.idle { color: var(--gp-fg-3); border:1px solid var(--gp-border-strong); }
+  .status-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+  .row-actions { display:flex; gap: 6px; justify-content: flex-end; }
+  .btn.mini { padding: 6px 10px; font-size: 11px; }
+
+  /* DOWNLOAD MODEL */
+  .dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .source-radio { display:flex; flex-direction: column; gap: 10px; }
+  .source-row { display:flex; align-items: center; gap: 14px; padding: 14px; border:1px solid var(--gp-border); border-radius: 4px; cursor: pointer; background: rgba(0,0,0,.2); transition: all 200ms; }
+  .source-row:hover { border-color: var(--gp-border-glow); }
+  .source-row.active { border-color: var(--gp-primary); background: rgba(14,165,233,.06); box-shadow: 0 0 16px rgba(14,165,233,.15); }
+  .source-row .ic { width: 38px; height: 38px; border-radius: 4px; background: rgba(14,165,233,.1); border:1px solid rgba(14,165,233,.3); color: var(--gp-primary); display:flex; align-items:center; justify-content:center; }
+  .source-row .ic i { width: 18px; height: 18px; }
+  .source-row .info { flex: 1; }
+  .source-row .info .t { font-family: var(--gp-font-display); font-weight: 700; font-size: 14px; color: var(--gp-fg-1); letter-spacing:.5px; text-transform: uppercase; }
+  .source-row .info .d { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1px; margin-top: 4px; }
+  .source-row .check { width: 18px; height: 18px; border-radius: 50%; border:1px solid var(--gp-border-strong); }
+  .source-row.active .check { border-color: var(--gp-primary); background: var(--gp-primary); box-shadow: 0 0 0 3px rgba(14,165,233,.2), inset 0 0 0 3px var(--gp-bg-deep); }
+  .repo-input { display:flex; align-items:center; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 4px; overflow: hidden; }
+  .repo-input .prefix { padding: 10px 12px; font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-3); letter-spacing: .5px; border-right:1px solid var(--gp-border); display:flex; align-items: center; gap: 6px; }
+  .repo-input .prefix i { width: 12px; height: 12px; }
+  .repo-input input { flex: 1; padding: 10px 12px; background: transparent; border: none; color: var(--gp-fg-1); font-family: var(--gp-font-mono); font-size: 12px; outline: none; }
+  .train-bar { display:flex; align-items:center; gap: 12px; }
+  .train-bar .label { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; min-width: 70px; }
+  .train-bar .progress { height: 8px; background: rgba(0,0,0,.5); border:1px solid var(--gp-border); border-radius: 999px; overflow: hidden; }
+  .train-bar .progress .fill { height: 100%; background: linear-gradient(90deg, var(--gp-primary), var(--gp-accent)); box-shadow: 0 0 12px rgba(14,165,233,.5); }
+  .train-bar .num { font-family: var(--gp-font-display); font-weight: 700; font-size: 14px; color: var(--gp-fg-1); }
+  .validate-list { display:flex; flex-direction: column; gap: 8px; }
+  .vrow { display:flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(0,0,0,.3); border-left: 2px solid var(--gp-success); border-radius: 2px; font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-2); }
+  .vrow .ic { width: 18px; height: 18px; border-radius: 50%; background: rgba(16,185,129,.15); color: var(--gp-success); display:flex; align-items:center; justify-content:center; }
+  .vrow .ic i { width: 11px; height: 11px; }
+  .vrow code { font-family: var(--gp-font-mono); color: var(--gp-fg-1); }
+
+  /* CREATE MODEL */
+  .stepper { display:flex; gap: 8px; padding: 14px 16px; background: rgba(0,0,0,.3); border:1px solid var(--gp-border); border-radius: 4px; margin-bottom: 18px; overflow-x: auto; }
+  .step-pill { display:flex; align-items:center; gap: 8px; padding: 6px 12px; border:1px solid var(--gp-border); border-radius: 4px; flex-shrink: 0; }
+  .step-pill .num { width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,.4); border:1px solid var(--gp-border-strong); color: var(--gp-fg-3); display:flex; align-items:center; justify-content:center; font-family: var(--gp-font-mono); font-size: 10px; font-weight: 700; }
+  .step-pill .lbl { font-family: var(--gp-font-display); font-weight: 700; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-3); }
+  .step-pill.done .num { background: var(--gp-success); border-color: var(--gp-success); color: #fff; }
+  .step-pill.done .lbl { color: var(--gp-fg-2); }
+  .step-pill.active { border-color: var(--gp-primary); background: rgba(14,165,233,.08); box-shadow: 0 0 12px rgba(14,165,233,.2); }
+  .step-pill.active .num { background: var(--gp-primary); border-color: var(--gp-primary); color: #fff; box-shadow: 0 0 10px rgba(14,165,233,.6); }
+  .step-pill.active .lbl { color: var(--gp-primary); }
+
+  .creator-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .type-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .type-tile { padding: 14px; border:1px solid var(--gp-border); border-radius: 4px; background: rgba(0,0,0,.3); cursor: pointer; transition: all 200ms; }
+  .type-tile:hover { border-color: var(--gp-border-glow); }
+  .type-tile.selected { border-color: var(--gp-primary); background: rgba(14,165,233,.06); box-shadow: 0 0 16px rgba(14,165,233,.18); }
+  .type-tile .ic { width: 36px; height: 36px; border-radius: 4px; background: rgba(14,165,233,.1); border:1px solid rgba(14,165,233,.3); color: var(--gp-primary); display:flex; align-items:center; justify-content:center; margin-bottom: 10px; }
+  .type-tile .ic i { width: 18px; height: 18px; }
+  .type-tile h4 { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--gp-fg-1); margin-bottom: 6px; }
+  .type-tile p { font-family: var(--gp-font-body); font-size: 11px; color: var(--gp-fg-3); line-height: 1.4; }
+
+  .label-row { display:flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--gp-border); }
+  .label-row:last-child { border-bottom: none; }
+  .label-row .check { width: 16px; height: 16px; border-radius: 2px; background: rgba(16,185,129,.15); border:1px solid var(--gp-success); color: var(--gp-success); display:flex; align-items:center; justify-content:center; }
+  .label-row .check i { width: 10px; height: 10px; }
+  .label-row .name { font-family: var(--gp-font-mono); font-size: 12px; color: var(--gp-fg-1); flex: 1; }
+  .label-row .keys { display:flex; gap: 4px; }
+  .label-row .keys .k { font-family: var(--gp-font-mono); font-size: 9px; padding: 2px 6px; background: rgba(14,165,233,.08); border:1px solid rgba(14,165,233,.3); color: var(--gp-primary); border-radius: 2px; letter-spacing: 1px; min-width: 18px; text-align: center; }
+
+  .stat-cell { padding: 12px; background: rgba(0,0,0,.3); border:1px solid var(--gp-border); border-radius: 4px; text-align: center; }
+  .stat-cell .k { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-cell .v { font-family: var(--gp-font-display); font-weight: 700; font-size: 22px; color: var(--gp-fg-1); }
+  .stat-cell .v em { font-style: normal; color: var(--gp-primary); }
+
+  .pred-bar { display:flex; align-items: center; gap: 10px; }
+  .pred-bar .name { font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-2); min-width: 110px; letter-spacing: .5px; }
+  .pred-bar .track { flex: 1; height: 8px; background: rgba(0,0,0,.5); border:1px solid var(--gp-border); border-radius: 999px; overflow: hidden; }
+  .pred-bar .track .fill { height: 100%; background: linear-gradient(90deg, var(--gp-primary), var(--gp-accent)); }
+  .pred-bar .pct { font-family: var(--gp-font-display); font-weight: 700; font-size: 12px; color: var(--gp-fg-1); min-width: 36px; text-align: right; }
+
+  .models-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .models-table th { text-align: left; font-family: var(--gp-font-mono); font-size: 10px; letter-spacing: 1.5px; color: var(--gp-fg-3); text-transform: uppercase; padding: 10px 14px; border-bottom: 1px solid var(--gp-border); font-weight: 600; }
+  .models-table td { padding: 14px; border-bottom: 1px solid var(--gp-border); font-family: var(--gp-font-body); font-size: 13px; color: var(--gp-fg-2); }
+  .models-table tr:hover td { background: rgba(14,165,233,.04); }
+  .model-name { font-family: var(--gp-font-display); font-weight: 700; color: var(--gp-fg-1); font-size: 14px; letter-spacing:.5px; }
+  .model-name .v { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); margin-left: 6px; letter-spacing: 1px; }
+  .model-meta { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1px; text-transform: uppercase; }
+  .type-badge { font-family: var(--gp-font-mono); font-size: 9px; padding: 3px 7px; border-radius: 2px; letter-spacing: 1.5px; text-transform: uppercase; border:1px solid; display:inline-block; }
+  .type-badge.action { color: #0EA5E9; border-color: #0EA5E9; background: rgba(14,165,233,.08); }
+  .type-badge.vision { color: #D946EF; border-color: #D946EF; background: rgba(217,70,239,.08); }
+  .type-badge.skill  { color: #10B981; border-color: #10B981; background: rgba(16,185,129,.08); }
+  .type-badge.policy { color: #F59E0B; border-color: #F59E0B; background: rgba(245,158,11,.08); }
+  .src { display:inline-flex; align-items:center; gap: 6px; }
+  .src i { width: 12px; height: 12px; color: var(--gp-fg-3); }
+  .row-actions { display:flex; gap: 6px; justify-content: flex-end; }
+  .row-actions .mini { padding: 5px 10px; font-size: 10px; letter-spacing: 1px; }
+  .status-pill { font-family: var(--gp-font-mono); font-size: 9px; letter-spacing: 1.5px; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; display:inline-flex; align-items:center; gap: 5px; border:1px solid; }
+  .status-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+  .status-pill.active { color: var(--gp-success); border-color: var(--gp-success); background: rgba(16,185,129,.08); }
+  .status-pill.idle   { color: var(--gp-fg-3); border-color: var(--gp-border-strong); }
+
+  /* DOWNLOAD */
+  .dl-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+  .source-radio { display:flex; flex-direction:column; gap: 10px; }
+  .source-row { display:flex; align-items:center; gap: 12px; padding: 12px 14px; background: rgba(0,0,0,.3); border:1px solid var(--gp-border); border-radius: 4px; cursor: pointer; transition: 200ms; }
+  .source-row.active { border-color: var(--gp-primary); background: rgba(14,165,233,.06); box-shadow: 0 0 12px rgba(14,165,233,.15); }
+  .source-row .ic { width: 32px; height: 32px; border-radius: 4px; background: rgba(14,165,233,.1); border:1px solid rgba(14,165,233,.3); display:flex; align-items:center; justify-content:center; color: var(--gp-primary); flex-shrink: 0; }
+  .source-row .ic i { width: 16px; height: 16px; }
+  .source-row .info { flex: 1; }
+  .source-row .t { font-family: var(--gp-font-display); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); }
+  .source-row .d { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1px; margin-top: 3px; }
+  .source-row .check { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--gp-border-strong); flex-shrink: 0; position: relative; }
+  .source-row.active .check { border-color: var(--gp-primary); box-shadow: inset 0 0 0 4px var(--gp-primary); }
+
+  .repo-input { display:flex; gap: 0; }
+  .repo-input .prefix { padding: 10px 12px; background: rgba(0,0,0,.5); border:1px solid var(--gp-border); border-right: none; border-radius: 4px 0 0 4px; font-family: var(--gp-font-mono); font-size: 12px; color: var(--gp-fg-3); display:flex; align-items: center; gap: 6px; }
+  .repo-input .prefix i { width: 13px; height: 13px; }
+  .repo-input input { flex: 1; padding: 10px 12px; background: rgba(0,0,0,.3); border:1px solid var(--gp-border); border-radius: 0 4px 4px 0; color: var(--gp-fg-1); font-family: var(--gp-font-mono); font-size: 12px; }
+  .repo-input input:focus { outline: none; border-color: var(--gp-primary); box-shadow: 0 0 8px rgba(14,165,233,.2); }
+
+  .validate-list { display:flex; flex-direction: column; gap: 8px; }
+  .vrow { display:flex; align-items: center; gap: 10px; font-family: var(--gp-font-mono); font-size: 12px; color: var(--gp-fg-2); padding: 6px 0; }
+  .vrow .ic { width: 18px; height: 18px; border-radius: 3px; background: rgba(16,185,129,.15); border:1px solid var(--gp-success); display:flex; align-items: center; justify-content: center; color: var(--gp-success); flex-shrink: 0; }
+  .vrow .ic i { width: 11px; height: 11px; }
+  .vrow code { color: var(--gp-fg-1); font-weight: 700; }
+
+  .progress { height: 6px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 999px; overflow: hidden; position: relative; }
+  .progress .fill { height: 100%; background: linear-gradient(90deg, var(--gp-primary), var(--gp-accent)); box-shadow: 0 0 12px var(--gp-primary); }
+
+  /* CREATOR */
+  .stepper { display:flex; gap: 0; padding: 0; margin-bottom: 24px; border:1px solid var(--gp-border); border-radius: 4px; background: rgba(0,0,0,.3); overflow: hidden; }
+  .step-pill { flex: 1; padding: 12px 14px; display:flex; align-items: center; gap: 10px; border-right: 1px solid var(--gp-border); position: relative; }
+  .step-pill:last-child { border-right: none; }
+  .step-pill .num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,.05); border:1px solid var(--gp-border-strong); display:flex; align-items: center; justify-content: center; font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-3); font-weight: 700; flex-shrink: 0; }
+  .step-pill .lbl { font-family: var(--gp-font-display); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-3); font-weight: 700; }
+  .step-pill.done .num { background: rgba(16,185,129,.15); border-color: var(--gp-success); color: var(--gp-success); }
+  .step-pill.done .lbl { color: var(--gp-fg-2); }
+  .step-pill.active { background: rgba(14,165,233,.08); }
+  .step-pill.active .num { background: var(--gp-primary); border-color: var(--gp-primary); color: #fff; box-shadow: 0 0 12px rgba(14,165,233,.5); }
+  .step-pill.active .lbl { color: var(--gp-primary); }
+
+  .creator-grid { display:grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .type-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .type-tile { padding: 16px; border:1px solid var(--gp-border); border-radius: 4px; background: rgba(0,0,0,.3); cursor: pointer; display:flex; flex-direction: column; gap: 8px; transition: 200ms; }
+  .type-tile:hover { border-color: var(--gp-border-glow); }
+  .type-tile.selected { border-color: var(--gp-primary); background: rgba(14,165,233,.06); box-shadow: 0 0 16px rgba(14,165,233,.18); }
+  .type-tile .ic { width: 32px; height: 32px; border-radius: 4px; background: rgba(14,165,233,.1); border:1px solid rgba(14,165,233,.3); display:flex; align-items: center; justify-content: center; color: var(--gp-primary); }
+  .type-tile .ic i { width: 16px; height: 16px; }
+  .type-tile h4 { font-family: var(--gp-font-display); font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--gp-fg-1); }
+  .type-tile p { font-family: var(--gp-font-body); font-size: 12px; line-height: 1.5; color: var(--gp-fg-3); }
+
+  .label-row { display:grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 9px 12px; border-bottom: 1px solid var(--gp-border); }
+  .label-row:last-child { border-bottom: none; }
+  .label-row .check { width: 16px; height: 16px; border-radius: 3px; border:1px solid var(--gp-primary); background: rgba(14,165,233,.15); display:flex; align-items:center; justify-content: center; color: var(--gp-primary); }
+  .label-row .check i { width: 11px; height: 11px; }
+  .label-row .name { font-family: var(--gp-font-mono); font-size: 12px; color: var(--gp-fg-1); }
+  .label-row .keys { display:flex; gap: 4px; }
+  .label-row .keys .k { padding: 3px 8px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 3px; font-family: var(--gp-font-display); font-weight: 700; font-size: 11px; color: var(--gp-fg-1); letter-spacing: 1px; box-shadow: inset 0 -1px 0 rgba(0,0,0,.4); }
+
+  .train-bar { display:flex; align-items: center; gap: 14px; padding: 14px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 4px; }
+  .train-bar .label { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; min-width: 60px; }
+  .train-bar .num { font-family: var(--gp-font-display); font-weight: 700; font-size: 22px; color: var(--gp-primary); min-width: 60px; text-align: right; }
+
+  .pred-bar { display:flex; align-items: center; gap: 10px; }
+  .pred-bar .name { font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-fg-2); min-width: 110px; letter-spacing: .5px; }
+  .pred-bar .track { flex: 1; height: 6px; background: rgba(0,0,0,.4); border-radius: 3px; overflow: hidden; }
+  .pred-bar .fill { height: 100%; background: linear-gradient(90deg, var(--gp-primary), var(--gp-accent)); }
+  .pred-bar .pct { font-family: var(--gp-font-mono); font-size: 11px; font-weight: 700; color: var(--gp-fg-1); min-width: 36px; text-align: right; }
+
+  /* ============ NEWS ============ */
+  .news-filter { display:flex; align-items: center; gap: 8px; padding: 6px; background: rgba(0,0,0,.4); border:1px solid var(--gp-border); border-radius: 4px; margin-bottom: 22px; width: fit-content; flex-wrap: wrap; }
+  .news-chip { padding: 7px 14px; border-radius: 3px; cursor: pointer; font-family: var(--gp-font-display); font-weight: 700; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-3); display:inline-flex; align-items:center; gap: 6px; border: 1px solid transparent; transition: 200ms; }
+  .news-chip .ct { font-family: var(--gp-font-mono); font-size: 9px; padding: 1px 5px; border-radius: 2px; background: rgba(255,255,255,.05); color: var(--gp-fg-3); }
+  .news-chip.active { background: rgba(14,165,233,.12); color: var(--gp-primary); border-color: rgba(14,165,233,.4); }
+  .news-chip.active .ct { background: rgba(14,165,233,.2); color: var(--gp-primary); }
+  .news-chip:hover:not(.active) { color: var(--gp-fg-1); }
+
+  .heroes { display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 22px; }
+  .hero-card { position: relative; border-radius: 4px; overflow: hidden; border:1px solid var(--gp-border); background: rgba(15,23,42,.6); transition: 200ms; }
+  .hero-card:hover { border-color: var(--gp-border-glow); box-shadow: 0 0 20px rgba(14,165,233,.18); }
+  .hero-card .cover { aspect-ratio: 16/9; position: relative; background-size: cover; background-position: center; background-color: #0c1627; }
+  .hero-card .cover::after { content:""; position:absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,32,0) 0%, rgba(11,16,32,.55) 60%, rgba(11,16,32,.95) 100%); }
+  /* placeholder game art (used when Steam header_image is missing) */
+  .hero-card .cover.g1 { background: radial-gradient(ellipse at 30% 40%, #D946EF 0%, #5B21B6 40%, #1E1B4B 80%), repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,.04) 8px 9px); }
+  .hero-card .cover.g2 { background: radial-gradient(circle at 70% 30%, #F59E0B 0%, #B45309 35%, #1F2937 75%), repeating-linear-gradient(-45deg, transparent 0 12px, rgba(0,0,0,.2) 12px 13px); }
+  .hero-card .cover.g3 { background: linear-gradient(135deg, #064E3B, #0F766E 50%, #0EA5E9), repeating-linear-gradient(0deg, transparent 0 6px, rgba(0,0,0,.15) 6px 7px); }
+  .hero-card .rank { position:absolute; top: 12px; left: 12px; font-family: var(--gp-font-display); font-weight: 700; font-size: 26px; color: #fff; letter-spacing: 1px; padding: 4px 10px; background: rgba(0,0,0,.6); border-left: 3px solid var(--gp-primary); z-index: 2; }
+  .hero-card .top-pill { position: absolute; top: 14px; right: 12px; z-index: 2; }
+  .hero-card .body { padding: 16px 18px 18px; }
+  .hero-card h3 { font-family: var(--gp-font-display); font-weight: 700; font-size: 22px; color: var(--gp-fg-1); letter-spacing: .3px; line-height: 1.05; margin-bottom: 8px; text-transform: uppercase; }
+  .hero-card .gen { display:flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+  .gen-tag { font-family: var(--gp-font-mono); font-size: 9px; letter-spacing: 1px; color: var(--gp-fg-3); padding: 2px 6px; border:1px solid var(--gp-border); border-radius: 2px; text-transform: uppercase; }
+  .hero-card .stat { display:flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+  .hero-card .stat .num { font-family: var(--gp-font-display); font-weight: 700; font-size: 28px; color: var(--gp-primary); letter-spacing: 0; line-height: 1; }
+  .hero-card .stat .lbl { font-family: var(--gp-font-mono); font-size: 10px; color: var(--gp-fg-3); letter-spacing: 1.5px; text-transform: uppercase; }
+  .hero-card .spark { width: 100%; height: 28px; margin: 6px 0 14px; }
+  .hero-card .ctas { display:flex; gap: 8px; }
+  .hero-card .ctas .btn { flex: 1; justify-content: center; }
+
+  /* compatibility colors */
+  .compat-pill { display:inline-flex; align-items:center; gap: 6px; padding: 4px 10px; border-radius: 2px; font-family: var(--gp-font-mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; border: 1px solid; backdrop-filter: blur(8px); }
+  .compat-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+  .compat-supported { color: var(--gp-success); border-color: var(--gp-success); background: rgba(16,185,129,.12); }
+  .compat-beta { color: #0EA5E9; border-color: #0EA5E9; background: rgba(14,165,233,.12); }
+  .compat-trainable { color: #F59E0B; border-color: #F59E0B; background: rgba(245,158,11,.12); }
+  .compat-locked { color: var(--gp-fg-3); border-color: var(--gp-border-strong); background: rgba(0,0,0,.4); }
+
+  /* news table */
+  .news-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+  .news-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .news-table th { text-align: left; padding: 10px 14px; font-family: var(--gp-font-mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-3); border-bottom: 1px solid var(--gp-border); background: rgba(0,0,0,.3); }
+  .news-table td { padding: 12px 14px; border-bottom: 1px solid var(--gp-border); font-size: 13px; color: var(--gp-fg-2); vertical-align: middle; }
+  .news-table tr:last-child td { border-bottom: none; }
+  .news-table tr:hover td { background: rgba(14,165,233,.04); }
+  .news-table .rk { font-family: var(--gp-font-display); font-weight: 700; font-size: 16px; color: var(--gp-fg-3); letter-spacing: 1px; width: 40px; }
+  .game-cell { display:flex; align-items: center; gap: 12px; }
+  .game-thumb { width: 52px; height: 28px; border-radius: 2px; flex-shrink: 0; border:1px solid var(--gp-border); background-size: cover; background-position: center; background-color: #0c1627; }
+  .game-thumb.g4 { background: linear-gradient(135deg, #7C2D12, #DC2626); }
+  .game-thumb.g5 { background: linear-gradient(135deg, #1E3A8A, #0EA5E9); }
+  .game-thumb.g6 { background: linear-gradient(135deg, #064E3B, #10B981); }
+  .game-thumb.g7 { background: linear-gradient(135deg, #4A044E, #D946EF); }
+  .game-thumb.g8 { background: linear-gradient(135deg, #292524, #F59E0B); }
+  .game-thumb.g9 { background: linear-gradient(135deg, #1F2937, #6B7280); }
+  .game-thumb.g10 { background: linear-gradient(135deg, #831843, #EC4899); }
+  .game-cell .info .name { font-family: var(--gp-font-display); font-weight: 700; font-size: 14px; color: var(--gp-fg-1); letter-spacing: .3px; text-transform: uppercase; }
+  .game-cell .info .meta { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing: 1px; margin-top: 3px; }
+  .players-cell { font-family: var(--gp-font-display); font-weight: 700; font-size: 15px; color: var(--gp-fg-1); }
+  .players-cell .delta { font-family: var(--gp-font-mono); font-size: 9px; letter-spacing: 1px; margin-left: 6px; padding: 1px 5px; border-radius: 2px; }
+  .players-cell .delta.up { color: var(--gp-success); background: rgba(16,185,129,.1); }
+  .players-cell .delta.dn { color: var(--gp-fg-3); background: rgba(255,255,255,.04); }
+  .lock-reason { font-family: var(--gp-font-mono); font-size: 9px; color: var(--gp-fg-3); letter-spacing: .5px; padding: 8px 14px 8px 78px; }
+
+  /* right rail */
+  .rail-card { padding: 16px 18px; }
+  .rail-card .h4 { font-family: var(--gp-font-display); font-weight: 700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gp-fg-3); margin-bottom: 14px; display:flex; justify-content: space-between; align-items: center; }
+  .trend-row { display:flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gp-border); }
+  .trend-row:last-child { border-bottom: none; }
+  .trend-row .game-thumb { width: 44px; height: 24px; }
+  .trend-row .name { font-family: var(--gp-font-display); font-weight: 700; font-size: 12px; color: var(--gp-fg-1); flex: 1; letter-spacing: .3px; text-transform: uppercase; }
+  .trend-row .pct { font-family: var(--gp-font-mono); font-size: 11px; font-weight: 700; color: var(--gp-success); padding: 3px 8px; background: rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); border-radius: 2px; letter-spacing: .5px; }
+
+  .saved-stat { padding: 18px; background: linear-gradient(135deg, rgba(217,70,239,.08), rgba(14,165,233,.08)); border:1px solid rgba(14,165,233,.3); border-radius: 4px; }
+  .saved-stat .big { font-family: var(--gp-font-display); font-weight: 700; font-size: 32px; color: var(--gp-fg-1); letter-spacing: 0; line-height: 1; margin-bottom: 8px; }
+  .saved-stat .big em { font-style: normal; background: linear-gradient(135deg, var(--gp-accent), var(--gp-primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .saved-stat p { font-family: var(--gp-font-body); font-size: 12px; color: var(--gp-fg-2); line-height: 1.5; }
+
+  .news-banner { margin-bottom: 16px; padding: 10px 14px; border:1px solid rgba(245,158,11,.4); background: rgba(245,158,11,.06); border-radius: 4px; font-family: var(--gp-font-mono); font-size: 11px; color: var(--gp-warning); letter-spacing: .5px; }
+
+  /* responsive shrink */
+  @media (max-width: 1100px) { .dash-grid { grid-template-columns: repeat(2, 1fr); } .dash-row, .ap-grid, .coach-grid, .safety-grid, .dl-grid, .creator-grid, .news-grid { grid-template-columns: 1fr; } .heroes { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside>
+    <div class="brand">
+      <img src="/static/logo-wordmark.svg" alt="GamePilot"/>
+      <span class="ver">0.1.0-β</span>
+    </div>
+    <div class="nav-section">// Pilot</div>
+    <div class="nav-item active" data-screen="dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</div>
+    <div class="nav-item" data-screen="autopilot"><i data-lucide="zap"></i>Autopilot</div>
+    <div class="nav-item" data-screen="coach"><i data-lucide="message-square"></i>AI Coach</div>
+    <div class="nav-item" data-screen="safety"><i data-lucide="shield-check"></i>Safety</div>
+    <div class="nav-section">// Models</div>
+    <div class="nav-item" data-screen="models"><i data-lucide="box"></i>Installed Models</div>
+    <div class="nav-item" data-screen="download"><i data-lucide="download-cloud"></i>Download Model</div>
+    <div class="nav-item" data-screen="creator"><i data-lucide="sparkles"></i>Create Model</div>
+    <div class="nav-section">// Discover</div>
+    <div class="nav-item" data-screen="news"><i data-lucide="newspaper"></i>News</div>
+    <div class="nav-section">// Library</div>
+    <div class="nav-item"><i data-lucide="gamepad-2"></i>Games</div>
+    <div class="nav-item"><i data-lucide="terminal"></i>Logs</div>
+    <div class="nav-item"><i data-lucide="settings-2"></i>Settings</div>
+    <div class="sidebar-foot">
+      <div class="avatar">RP</div>
+      <div class="who">
+        <span class="name">RogueProto</span>
+        <span class="meta">● online · 41ms</span>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- =============== DASHBOARD =============== -->
+    <div class="screen active" data-screen="dashboard" data-screen-label="01 Dashboard">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// Home</span>
+          <h1>Welcome back, RogueProto.</h1>
+        </div>
+        <div class="right">
+          <span class="pill live"><span class="dot"></span>Vision online · 41ms</span>
+          <button class="btn btn-engage"><i data-lucide="zap"></i>Engage Autopilot</button>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="card stat-card">
+          <div class="k">// Bosses beaten</div>
+          <div class="v"><em>23</em></div>
+          <div class="d"><em>+5</em> this week</div>
+        </div>
+        <div class="card stat-card">
+          <div class="k">// AFK saves</div>
+          <div class="v"><em>147</em></div>
+          <div class="d">Pizza, dishes, life.</div>
+        </div>
+        <div class="card stat-card">
+          <div class="k">// Time saved</div>
+          <div class="v"><em>62</em>h</div>
+          <div class="d">vs. manual grind</div>
+        </div>
+        <div class="card stat-card">
+          <div class="k">// Multiplayer touched</div>
+          <div class="v"><em>0</em></div>
+          <div class="d"><em>By design.</em></div>
+        </div>
+      </div>
+
+      <div class="dash-row">
+        <div class="card">
+          <div class="h4">Choose Autopilot mode <span class="right">// 4 modes</span></div>
+          <div class="modes-grid">
+            <div class="mode-tile boss featured">
+              <div class="head"><div class="ico"><i data-lucide="swords"></i></div><span class="tag">⏱ 5–60 min</span></div>
+              <h3>Beat Boss</h3>
+              <p>"Boss killed you 50 times? Hand the controller to AI. Watch it learn the pattern."</p>
+              <div class="meta"><span class="tag">Souls-likes</span><span class="tag">Last: Malenia</span></div>
+            </div>
+            <div class="mode-tile alive">
+              <div class="head"><div class="ico"><i data-lucide="shield"></i></div><span class="tag">⏱ Any</span></div>
+              <h3>Stay Alive</h3>
+              <p>"Pizza's here. Don't die while you eat. AI plays defense — runs, dodges, retreats."</p>
+              <div class="meta"><span class="tag">Open-world</span></div>
+            </div>
+            <div class="mode-tile build">
+              <div class="head"><div class="ico"><i data-lucide="hammer"></i></div><span class="tag">Sandbox</span></div>
+              <h3>Build</h3>
+              <p>"Show AI a screenshot of the castle you want. AI builds it. Block by block."</p>
+              <div class="meta"><span class="tag">Minecraft</span><span class="tag">Valheim</span></div>
+            </div>
+            <div class="mode-tile farm">
+              <div class="head"><div class="ico"><i data-lucide="pickaxe"></i></div><span class="tag">⏱ 30 min</span></div>
+              <h3>Farm Resources</h3>
+              <p>"Grinding is a second job. Set a timer. AI farms ore / pelts / souls."</p>
+              <div class="meta"><span class="tag">RPG</span><span class="tag">Survival</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="h4">Recent sessions <span class="right">// last 7d</span></div>
+          <div class="recent-item">
+            <div class="game"><i data-lucide="swords"></i></div>
+            <div class="info">
+              <span class="ttl">Elden Ring · Malenia</span>
+              <span class="meta">Beat Boss · 12:04 · today 14:02</span>
+            </div>
+            <span class="res win">✓ WIN</span>
+          </div>
+          <div class="recent-item">
+            <div class="game"><i data-lucide="hammer"></i></div>
+            <div class="info">
+              <span class="ttl">Minecraft · Spawn castle</span>
+              <span class="meta">Build · 28:47 · yesterday 21:18</span>
+            </div>
+            <span class="res run">RUNNING</span>
+          </div>
+          <div class="recent-item">
+            <div class="game"><i data-lucide="shield"></i></div>
+            <div class="info">
+              <span class="ttl">Valheim · Black Forest</span>
+              <span class="meta">Stay Alive · 06:20 · 2d ago</span>
+            </div>
+            <span class="res win">✓ WIN</span>
+          </div>
+          <div class="recent-item">
+            <div class="game"><i data-lucide="pickaxe"></i></div>
+            <div class="info">
+              <span class="ttl">Skyrim · Dwarven ruins</span>
+              <span class="meta">Farm · 30:00 · 3d ago</span>
+            </div>
+            <span class="res win">✓ WIN</span>
+          </div>
+          <div class="recent-item">
+            <div class="game"><i data-lucide="swords"></i></div>
+            <div class="info">
+              <span class="ttl">Sekiro · Genichiro</span>
+              <span class="meta">Beat Boss · 04:11 · 4d ago</span>
+            </div>
+            <span class="res fail">FAIL</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============== AUTOPILOT SETUP =============== -->
+    <div class="screen" data-screen="autopilot" data-screen-label="02 Autopilot Setup">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// Autopilot · Setup</span>
+          <h1>Engage AI. Step away.</h1>
+        </div>
+        <div class="right">
+          <span class="pill"><span class="dot" style="background:#94A3B8;"></span>Standby</span>
+          <button class="btn btn-ghost"><i data-lucide="x"></i>Cancel</button>
+        </div>
+      </div>
+
+      <div class="ap-grid">
+        <div>
+          <div class="card" style="padding: 14px;">
+            <div class="ap-screen">
+              <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+              <div class="ohlay-ttl">⬤ AI VISION · 41ms</div>
+              <div class="hpbar"><div class="lbl">Malenia · phase 2</div><div class="bar"><div></div></div></div>
+              <div class="silhouette"></div>
+              <div class="crosshair"></div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px;">
+              <div class="stat-cell"><div class="k">Game</div><div class="v">Elden Ring</div></div>
+              <div class="stat-cell"><div class="k">Encounter</div><div class="v">Malenia</div></div>
+              <div class="stat-cell"><div class="k">Vision</div><div class="v"><em>online</em></div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 16px;">
+            <div class="h4">Pre-flight checks <span class="right">// 6/6</span></div>
+            <div class="preflight">
+              <div class="row"><span class="ic"><i data-lucide="check"></i></span>Single-player session detected</div>
+              <div class="row"><span class="ic"><i data-lucide="check"></i></span>No multiplayer / ranked traffic</div>
+              <div class="row"><span class="ic"><i data-lucide="check"></i></span>Vision model loaded · 41ms latency</div>
+              <div class="row"><span class="ic"><i data-lucide="check"></i></span>Action model loaded · BEAT_BOSS profile</div>
+              <div class="row"><span class="ic"><i data-lucide="check"></i></span>Emergency stop armed · Ctrl + Shift + Esc</div>
+              <div class="row"><span class="ic"><i data-lucide="check"></i></span>Session log recording to disk</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ap-controls">
+          <div class="card">
+            <div class="h4">Mode</div>
+            <div class="modes-grid">
+              <div class="mode-tile boss featured" style="padding: 12px;">
+                <div class="head"><div class="ico"><i data-lucide="swords"></i></div></div>
+                <h3 style="font-size: 14px;">Beat Boss</h3>
+              </div>
+              <div class="mode-tile alive" style="padding: 12px;">
+                <div class="head"><div class="ico"><i data-lucide="shield"></i></div></div>
+                <h3 style="font-size: 14px;">Stay Alive</h3>
+              </div>
+              <div class="mode-tile build" style="padding: 12px;">
+                <div class="head"><div class="ico"><i data-lucide="hammer"></i></div></div>
+                <h3 style="font-size: 14px;">Build</h3>
+              </div>
+              <div class="mode-tile farm" style="padding: 12px;">
+                <div class="head"><div class="ico"><i data-lucide="pickaxe"></i></div></div>
+                <h3 style="font-size: 14px;">Farm</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="h4">Session limits</div>
+            <div class="ap-form-row" style="margin-bottom: 14px;">
+              <label>// Time cap (hard ceiling 60 min)</label>
+              <div class="slider-wrap">
+                <div class="track"><div class="fill"></div><div class="thumb"></div></div>
+                <div class="val"><em>15</em>:00</div>
+              </div>
+            </div>
+            <div class="ap-form-row" style="margin-bottom: 14px;">
+              <label>// Stop conditions</label>
+              <select><option>HP &lt; 10% · 3 deaths · time cap</option></select>
+            </div>
+            <div class="ap-form-row">
+              <label>// Emergency hotkey</label>
+              <div class="keys-row" style="margin: 0;">
+                <span class="key">Ctrl</span><span class="plus">+</span><span class="key">Shift</span><span class="plus">+</span><span class="key">Esc</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="engage-bar">
+            <div class="info">
+              <div class="t">Ready to engage</div>
+              <div class="d">// Beat Boss · 15:00 · Single-player · Stop armed</div>
+            </div>
+            <button class="btn btn-engage"><i data-lucide="zap"></i>Start Autopilot</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============== AI COACH =============== -->
+    <div class="screen" data-screen="coach" data-screen-label="03 AI Coach">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// Coach · Live session</span>
+          <h1>Watch. Learn. Win.</h1>
+        </div>
+        <div class="right">
+          <span class="pill live"><span class="dot"></span>Watching · Elden Ring</span>
+          <button class="btn btn-primary"><i data-lucide="square"></i>End coach</button>
+        </div>
+      </div>
+
+      <div class="coach-grid">
+        <div class="card coach-feed">
+          <div class="h4">Live feed · AI is watching <span class="right">// 41ms</span></div>
+          <div class="coach-screen">
+            <div class="silhouette"></div>
+            <div class="crosshair"></div>
+            <div style="position:absolute; top:14px; left:14px; font-family: var(--gp-font-mono); font-size:10px; color:#0EA5E9; letter-spacing:1.5px; padding:3px 8px; background:rgba(0,0,0,.6); border:1px solid rgba(14,165,233,.4); text-transform:uppercase;">⬤ AI VISION</div>
+            <div style="position:absolute; bottom:14px; left:14px; right:14px; display:flex; justify-content:space-between; font-family: var(--gp-font-mono); font-size:10px; color:rgba(255,255,255,.7); letter-spacing:1px; text-transform:uppercase;">
+              <span>SCENE: BOSS_ARENA</span>
+              <span>HP: 32% · MP: 80%</span>
+            </div>
+          </div>
+          <div class="coach-vision-meta">
+            <div class="stat-cell"><div class="k">Frame</div><div class="v"><em>0042</em></div></div>
+            <div class="stat-cell"><div class="k">Predicted action</div><div class="v" style="color:#D946EF;">DODGE_R</div></div>
+            <div class="stat-cell"><div class="k">Conf</div><div class="v"><em>0.92</em></div></div>
+          </div>
+        </div>
+
+        <div class="card chat">
+          <div class="chat-head">
+            <div class="who">
+              <div class="ai"><i data-lucide="brain"></i></div>
+              <div>
+                <div class="name">AI Coach</div>
+                <div class="stat-line">● grounded in your screen</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost" style="padding: 6px 10px; font-size: 11px;"><i data-lucide="settings-2"></i>Coach</button>
+          </div>
+          <div class="chat-body">
+            <div class="msg system"><div class="bubble">// Session started · Elden Ring · Malenia phase 2</div></div>
+
+            <div class="msg user">
+              <div class="meta">You · 14:01:22</div>
+              <div class="bubble">i keep dying to that flurry attack. wtf do i do</div>
+            </div>
+
+            <div class="msg ai">
+              <div class="meta">Coach · 14:01:23 · 41ms</div>
+              <div class="bubble">
+                Waterfowl Dance. <b>The thing that keeps clipping you.</b><br><br>
+                Three things I'm seeing on your screen:<br>
+                · You're rolling <code>FORWARD</code>. Roll <b>diagonally away</b> on the first flurry.<br>
+                · Second flurry: jump + light attack to break iframes.<br>
+                · Third: bait it from <b>medium range</b>, not point-blank.<br><br>
+                Want me to take over for one attempt so you can see it? <code>BEAT_BOSS</code> mode, 5 min cap.
+              </div>
+            </div>
+
+            <div class="msg user">
+              <div class="meta">You · 14:02:08</div>
+              <div class="bubble">say less fam, do it</div>
+            </div>
+
+            <div class="msg ai">
+              <div class="meta">Coach · 14:02:09</div>
+              <div class="bubble">
+                Engaging in <b>3… 2… 1…</b><br>
+                <code>autopilot.start(mode="BEAT_BOSS", cap="05:00")</code><br>
+                Stop is <code>Ctrl+Shift+Esc</code>. Watch the dodge timing on attack 2 — that's where you've been getting hit.
+              </div>
+            </div>
+
+            <div class="msg system"><div class="bubble">// Autopilot engaged · 04:58 left · keys returning to AI</div></div>
+          </div>
+          <div class="quick-row">
+            <span class="quick">// what build is this</span>
+            <span class="quick">// best dodge frames?</span>
+            <span class="quick">// take over for 1 try</span>
+            <span class="quick">// safer farming spot</span>
+          </div>
+          <div class="chat-input">
+            <input placeholder="Ask anything about what's on screen…"/>
+            <button><i data-lucide="send-horizontal"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============== SAFETY =============== -->
+    <div class="screen" data-screen="safety" data-screen-label="04 Safety">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// Safety · Always-on</span>
+          <h1>You are always in control.</h1>
+        </div>
+        <div class="right">
+          <span class="pill" style="border-color: var(--gp-success); color: var(--gp-success);"><span class="dot" style="background: var(--gp-success);"></span>All guardrails ON</span>
+          <button class="btn btn-ghost"><i data-lucide="download"></i>Export logs</button>
+        </div>
+      </div>
+
+      <div class="safety-grid">
+        <div style="display:flex; flex-direction: column; gap: 16px;">
+          <div class="card stop-card">
+            <div class="stop-row">
+              <div class="stop-icon"><i data-lucide="octagon-x"></i></div>
+              <div class="body">
+                <h3>Emergency Stop</h3>
+                <p>One hotkey. <b>Always armed, no matter what.</b> Kills the autopilot loop, returns keyboard and mouse to you, writes the log, and freezes the input layer for 2s so nothing leaks through.</p>
+                <div class="keys-row">
+                  <span class="key">Ctrl</span><span class="plus">+</span><span class="key">Shift</span><span class="plus">+</span><span class="key">Esc</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="h4">Guardrails <span class="right">// always on</span></div>
+            <div class="toggles">
+              <div class="toggle-row">
+                <div class="info">
+                  <div class="ttl">Single-player only</div>
+                  <div class="desc">Multiplayer and ranked sessions are <b>blocked at the network layer</b>. Cannot be disabled.</div>
+                </div>
+                <div class="switch on" style="opacity:.6; cursor:not-allowed;"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="info">
+                  <div class="ttl">Hard time cap · 60 min</div>
+                  <div class="desc">Default 10 min, max 60. AI returns control no matter what at the cap.</div>
+                </div>
+                <div class="switch on" style="opacity:.6; cursor:not-allowed;"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="info">
+                  <div class="ttl">Memory injection · OFF</div>
+                  <div class="desc">GamePilot cannot read or modify game memory. Just keyboard and mouse.</div>
+                </div>
+                <div class="switch on" style="opacity:.6; cursor:not-allowed;"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="info">
+                  <div class="ttl">Cap acknowledgement</div>
+                  <div class="desc">Show a "session ending in 30s" overlay before AI hands control back.</div>
+                </div>
+                <div class="switch on"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="info">
+                  <div class="ttl">Pause on focus loss</div>
+                  <div class="desc">Halt input automation when the game window loses focus.</div>
+                </div>
+                <div class="switch on"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="info">
+                  <div class="ttl">Anonymous telemetry</div>
+                  <div class="desc">Help us improve coach answers. Logs never leave your machine.</div>
+                </div>
+                <div class="switch"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction: column; gap: 16px;">
+          <div class="card">
+            <div class="h4">Session log · live <span class="right">// last 24h</span></div>
+            <div class="term">
+              <div class="line"><span class="t">14:02:18</span><span class="tag sys">SYS</span><span class="msg">Autopilot engaged · BEAT_BOSS · 15:00 cap</span></div>
+              <div class="line"><span class="t">14:02:21</span><span class="tag inf">INF</span><span class="msg">Vision online · 41ms · streaming</span></div>
+              <div class="line"><span class="t">14:02:33</span><span class="tag inf">INF</span><span class="msg">DODGE_R · conf 0.92</span></div>
+              <div class="line"><span class="t">14:02:34</span><span class="tag inf">INF</span><span class="msg">ATTACK_HEAVY · conf 0.91 · x4</span></div>
+              <div class="line"><span class="t">14:02:47</span><span class="tag warn">WRN</span><span class="msg">HP 32% · evasive pattern</span></div>
+              <div class="line"><span class="t">14:03:02</span><span class="tag err">ERR</span><span class="msg">Online lobby probed · refusing</span></div>
+              <div class="line"><span class="t">14:03:14</span><span class="tag sys">SYS</span><span class="msg">Control returned · session 01:14 / 15:00</span></div>
+              <div class="line"><span class="t">14:18:02</span><span class="tag sys">SYS</span><span class="msg">EMERGENCY_STOP · user-triggered</span></div>
+              <div class="line"><span class="t">14:18:02</span><span class="tag inf">INF</span><span class="msg">Input layer frozen 2s · keys handed back</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="h4">This week <span class="right">// 14d retention</span></div>
+            <div class="dash-grid" style="grid-template-columns: 1fr 1fr;">
+              <div class="stat-card" style="padding: 14px; border:1px solid var(--gp-border); border-radius:4px;">
+                <div class="k">Emergency stops</div><div class="v"><em>2</em></div>
+              </div>
+              <div class="stat-card" style="padding: 14px; border:1px solid var(--gp-border); border-radius:4px;">
+                <div class="k">Multiplayer blocks</div><div class="v"><em>0</em></div>
+              </div>
+              <div class="stat-card" style="padding: 14px; border:1px solid var(--gp-border); border-radius:4px;">
+                <div class="k">Cap reached</div><div class="v"><em>1</em></div>
+              </div>
+              <div class="stat-card" style="padding: 14px; border:1px solid var(--gp-border); border-radius:4px;">
+                <div class="k">Avg session</div><div class="v"><em>11</em>m</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============== INSTALLED MODELS =============== -->
+    <div class="screen" data-screen="models" data-screen-label="05 Installed Models">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// Models · Registry</span>
+          <h1>Installed models.</h1>
+        </div>
+        <div class="right">
+          <button class="btn btn-ghost"><i data-lucide="download-cloud"></i>Download</button>
+          <button class="btn btn-engage"><i data-lucide="sparkles"></i>Create new</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active"><i data-lucide="box"></i>Installed · 5</div>
+        <div class="tab"><i data-lucide="download-cloud"></i>Download</div>
+        <div class="tab"><i data-lucide="sparkles"></i>My Drafts · 2</div>
+      </div>
+
+      <div class="dash-grid" style="margin-bottom: 18px;">
+        <div class="card stat-card"><div class="k">// Active models</div><div class="v"><em>2</em></div><div class="d">running in pilot</div></div>
+        <div class="card stat-card"><div class="k">// Disk used</div><div class="v"><em>1.4</em>GB</div><div class="d">of 50 GB cap</div></div>
+        <div class="card stat-card"><div class="k">// From Hugging Face</div><div class="v"><em>3</em></div><div class="d">community</div></div>
+        <div class="card stat-card"><div class="k">// Created by you</div><div class="v"><em>2</em></div><div class="d"><em>+1</em> training</div></div>
+      </div>
+
+      <div class="card" style="padding: 0;">
+        <table class="models-table">
+          <thead>
+            <tr>
+              <th>Model</th><th>Type</th><th>Game profile</th><th>Source</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">basic-combat-v0.1<span class="v">v0.1.0</span></div><div class="model-meta">288 MB · 8 actions</div></td>
+              <td><span class="type-badge action">action recognizer</span></td>
+              <td class="model-meta">open_world_rpg</td>
+              <td><span class="src"><i data-lucide="package"></i>local</span></td>
+              <td><span class="status-pill active"><span class="dot"></span>active</span></td>
+              <td><div class="row-actions"><button class="btn btn-ghost mini">Test</button><button class="btn btn-ghost mini">Delete</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">rpg-vision-v0.1<span class="v">v0.1.0</span></div><div class="model-meta">412 MB · HP / loot / enemy</div></td>
+              <td><span class="type-badge vision">vision model</span></td>
+              <td class="model-meta">open_world_rpg</td>
+              <td><span class="src"><i data-lucide="cloud-download"></i>huggingface</span></td>
+              <td><span class="status-pill active"><span class="dot"></span>active</span></td>
+              <td><div class="row-actions"><button class="btn btn-ghost mini">Test</button><button class="btn btn-ghost mini">Delete</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">movement-v0.2<span class="v">v0.2.0</span></div><div class="model-meta">156 MB · WASD imitation</div></td>
+              <td><span class="type-badge skill">imitation skill</span></td>
+              <td class="model-meta">souls_like</td>
+              <td><span class="src"><i data-lucide="sparkles"></i>created</span></td>
+              <td><span class="status-pill idle"><span class="dot" style="background:#64748B; box-shadow:none;"></span>idle</span></td>
+              <td><div class="row-actions"><button class="btn btn-primary mini">Activate</button><button class="btn btn-ghost mini">Test</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">souls-boss-policy<span class="v">v0.3.1</span></div><div class="model-meta">96 MB · skill router</div></td>
+              <td><span class="type-badge policy">policy model</span></td>
+              <td class="model-meta">souls_like</td>
+              <td><span class="src"><i data-lucide="link"></i>direct url</span></td>
+              <td><span class="status-pill idle"><span class="dot" style="background:#64748B; box-shadow:none;"></span>idle</span></td>
+              <td><div class="row-actions"><button class="btn btn-primary mini">Activate</button><button class="btn btn-ghost mini">Test</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">minecraft-builder<span class="v">v0.1.2</span></div><div class="model-meta">512 MB · screenshot → blocks</div></td>
+              <td><span class="type-badge skill">imitation skill</span></td>
+              <td class="model-meta">sandbox</td>
+              <td><span class="src"><i data-lucide="cloud-download"></i>huggingface</span></td>
+              <td><span class="status-pill idle"><span class="dot" style="background:#64748B; box-shadow:none;"></span>idle</span></td>
+              <td><div class="row-actions"><button class="btn btn-primary mini">Activate</button><button class="btn btn-ghost mini">Test</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- =============== DOWNLOAD MODEL =============== -->
+    <div class="screen" data-screen="download" data-screen-label="06 Download Model">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// Models · Download</span>
+          <h1>Get a model from the internet.</h1>
+        </div>
+        <div class="right">
+          <span class="pill"><span class="dot" style="background:#94A3B8;"></span>Step 1 of 3</span>
+        </div>
+      </div>
+
+      <div class="dl-grid">
+        <div style="display:flex; flex-direction: column; gap: 16px;">
+          <div class="card">
+            <div class="h4">Source <span class="right">// pick one</span></div>
+            <div class="source-radio">
+              <div class="source-row active">
+                <div class="ic"><i data-lucide="cloud-download"></i></div>
+                <div class="info">
+                  <div class="t">Hugging Face</div>
+                  <div class="d">// community models · validated · most popular</div>
+                </div>
+                <div class="check"></div>
+              </div>
+              <div class="source-row">
+                <div class="ic"><i data-lucide="link"></i></div>
+                <div class="info">
+                  <div class="t">Direct URL</div>
+                  <div class="d">// any .zip · validate before install</div>
+                </div>
+                <div class="check"></div>
+              </div>
+              <div class="source-row">
+                <div class="ic"><i data-lucide="hard-drive"></i></div>
+                <div class="info">
+                  <div class="t">Local ZIP</div>
+                  <div class="d">// drag-drop or browse · offline install</div>
+                </div>
+                <div class="check"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="h4">Repo <span class="right">// huggingface</span></div>
+            <div class="repo-input">
+              <span class="prefix"><i data-lucide="cloud-download"></i>huggingface.co/</span>
+              <input value="gamepilot/basic-combat-v0.1"/>
+            </div>
+            <div style="display:flex; gap: 10px; margin-top: 12px;">
+              <button class="btn btn-engage"><i data-lucide="download"></i>Download &amp; Validate</button>
+              <button class="btn btn-ghost"><i data-lucide="search"></i>Browse popular</button>
+            </div>
+            <div class="train-bar" style="margin-top: 14px;">
+              <span class="label">downloading</span>
+              <div class="progress" style="flex:1;"><div class="fill" style="width: 64%;"></div></div>
+              <span class="num"><em style="font-style:normal;">64</em>%</span>
+            </div>
+            <div class="model-meta" style="margin-top: 8px;">// 184 / 288 MB · 12.4 MB/s · ETA 8s</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="h4">Validation <span class="right">// 5/5 ✓</span></div>
+          <div class="validate-list">
+            <div class="vrow"><div class="ic"><i data-lucide="check"></i></div><code>manifest.json</code></div>
+            <div class="vrow"><div class="ic"><i data-lucide="check"></i></div><code>model.safetensors</code></div>
+            <div class="vrow"><div class="ic"><i data-lucide="check"></i></div><code>action_labels.json</code></div>
+            <div class="vrow"><div class="ic"><i data-lucide="check"></i></div><code>mappings.yaml</code></div>
+            <div class="vrow"><div class="ic"><i data-lucide="check"></i></div><span>compatible · gamepilot ≥ 0.2.0</span></div>
+          </div>
+
+          <div style="margin-top: 18px; padding: 14px; background: rgba(16,185,129,.06); border:1px solid rgba(16,185,129,.3); border-radius: 4px;">
+            <div class="h4" style="margin-bottom: 8px; color: var(--gp-success);">basic-combat-v0.1 <span class="right" style="color: var(--gp-success);">// ready</span></div>
+            <div class="model-meta">// type · action_recognizer · 8 actions</div>
+            <div style="display:flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;">
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">idle</span>
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">move_forward</span>
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">turn_left</span>
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">turn_right</span>
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">attack_target</span>
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">loot</span>
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">interact</span>
+              <span class="type-badge action" style="background:rgba(0,0,0,.3);">retreat</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap: 10px; margin-top: 16px;">
+            <button class="btn btn-engage" style="flex:1;"><i data-lucide="box"></i>Install Model</button>
+            <button class="btn btn-ghost"><i data-lucide="x"></i>Discard</button>
+          </div>
+          <div class="model-meta" style="margin-top: 10px; text-align:center;">// after install: activate &amp; test from Installed Models</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============== CREATE MODEL =============== -->
+    <div class="screen" data-screen="creator" data-screen-label="07 Create Model">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// Models · Creator · Step 6 of 8</span>
+          <h1>Train your own model.</h1>
+        </div>
+        <div class="right">
+          <button class="btn btn-ghost"><i data-lucide="save"></i>Save draft</button>
+          <button class="btn btn-engage"><i data-lucide="zap"></i>Start training</button>
+        </div>
+      </div>
+
+      <div class="stepper">
+        <div class="step-pill done"><div class="num"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div class="lbl">Type</div></div>
+        <div class="step-pill done"><div class="num"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div class="lbl">Data</div></div>
+        <div class="step-pill done"><div class="num"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div class="lbl">Actions</div></div>
+        <div class="step-pill done"><div class="num"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div class="lbl">Mapping</div></div>
+        <div class="step-pill done"><div class="num"><i data-lucide="check" style="width:12px;height:12px;"></i></div><div class="lbl">Label</div></div>
+        <div class="step-pill active"><div class="num">6</div><div class="lbl">Train</div></div>
+        <div class="step-pill"><div class="num">7</div><div class="lbl">Test</div></div>
+        <div class="step-pill"><div class="num">8</div><div class="lbl">Export</div></div>
+      </div>
+
+      <div class="creator-grid">
+        <div style="display:flex; flex-direction: column; gap: 16px;">
+          <div class="card">
+            <div class="h4">Model type <span class="right">// step 1</span></div>
+            <div class="type-grid">
+              <div class="type-tile selected">
+                <div class="ic"><i data-lucide="swords"></i></div>
+                <h4>Action Recognizer</h4>
+                <p>Video clip → semantic action. Best for combat &amp; encounters.</p>
+              </div>
+              <div class="type-tile">
+                <div class="ic" style="color:#10B981; background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.3);"><i data-lucide="copy"></i></div>
+                <h4>Imitation Skill</h4>
+                <p>Screen + state → control. Learns from your gameplay.</p>
+              </div>
+              <div class="type-tile">
+                <div class="ic" style="color:#D946EF; background:rgba(217,70,239,.1); border-color:rgba(217,70,239,.3);"><i data-lucide="eye"></i></div>
+                <h4>Vision / Object</h4>
+                <p>Detects HP bars, loot, enemies, UI overlays.</p>
+              </div>
+              <div class="type-tile">
+                <div class="ic" style="color:#F59E0B; background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.3);"><i data-lucide="git-branch"></i></div>
+                <h4>Policy</h4>
+                <p>Routes between skills. Picks the next move.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="h4">Action labels <span class="right">// 8 active</span></div>
+            <div style="background: rgba(0,0,0,.3); border:1px solid var(--gp-border); border-radius: 4px;">
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">idle</div><div class="keys"><span class="k">—</span></div></div>
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">move_forward</div><div class="keys"><span class="k">W</span></div></div>
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">turn_left</div><div class="keys"><span class="k">A</span></div></div>
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">turn_right</div><div class="keys"><span class="k">D</span></div></div>
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">attack_target</div><div class="keys"><span class="k">1</span></div></div>
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">loot</div><div class="keys"><span class="k">F</span></div></div>
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">interact</div><div class="keys"><span class="k">F</span></div></div>
+              <div class="label-row"><div class="check"><i data-lucide="check"></i></div><div class="name">retreat</div><div class="keys"><span class="k">SHIFT</span><span class="k">S</span></div></div>
+            </div>
+            <div class="repo-input" style="margin-top: 12px;">
+              <span class="prefix"><i data-lucide="plus"></i>add</span>
+              <input placeholder="cast_spell_1"/>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction: column; gap: 16px;">
+          <div class="card">
+            <div class="h4">Training <span class="right">// balanced preset</span></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <div class="stat-cell"><div class="k">Samples</div><div class="v"><em>8,420</em></div></div>
+              <div class="stat-cell"><div class="k">Epoch</div><div class="v">14<em style="font-style:normal; color:var(--gp-fg-3);"> /20</em></div></div>
+              <div class="stat-cell"><div class="k">Loss</div><div class="v"><em>0.41</em></div></div>
+            </div>
+            <div class="train-bar">
+              <span class="label">progress</span>
+              <div class="progress" style="flex:1;"><div class="fill" style="width: 72%;"></div></div>
+              <span class="num"><em style="font-style:normal;">72</em>%</span>
+            </div>
+            <div class="model-meta" style="margin-top: 10px;">// ETA 4m 12s · GPU 78% · VRAM 6.2/8 GB</div>
+          </div>
+
+          <div class="card">
+            <div class="h4">Test prediction <span class="right">// step 7 preview</span></div>
+            <div class="ap-screen" style="aspect-ratio: 16/9; box-shadow: inset 0 0 0 2px var(--gp-primary), inset 0 0 30px rgba(0,0,0,.6);">
+              <div class="silhouette"></div>
+              <div class="crosshair" style="border-color: rgba(14,165,233,.7); box-shadow: 0 0 14px rgba(14,165,233,.4);"></div>
+              <div style="position:absolute; top:10px; left:10px; font-family: var(--gp-font-mono); font-size:9px; color:#0EA5E9; letter-spacing:1.5px; padding:2px 6px; background:rgba(0,0,0,.6); border:1px solid rgba(14,165,233,.4); text-transform:uppercase;">⬤ TEST CLIP · 00:01:12</div>
+            </div>
+            <div style="display:flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+              <div class="pred-bar"><span class="name">attack_target</span><div class="track"><div class="fill" style="width:87%;"></div></div><span class="pct">87%</span></div>
+              <div class="pred-bar"><span class="name">move_forward</span><div class="track"><div class="fill" style="width:8%;"></div></div><span class="pct">8%</span></div>
+              <div class="pred-bar"><span class="name">idle</span><div class="track"><div class="fill" style="width:3%;"></div></div><span class="pct">3%</span></div>
+            </div>
+            <div style="display:flex; gap: 10px; margin-top: 14px;">
+              <button class="btn btn-engage" style="flex:1;"><i data-lucide="check"></i>Accept &amp; Register</button>
+              <button class="btn btn-ghost"><i data-lucide="package"></i>Export ZIP</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============== NEWS / DISCOVER =============== -->
+    <div class="screen" data-screen="news" data-screen-label="08 News">
+      <div class="page-head">
+        <div class="left">
+          <span class="crumb">// News · Live Steam Charts</span>
+          <h1>What people are playing now.</h1>
+        </div>
+        <div class="right">
+          <span class="pill live"><span class="dot"></span>LIVE · STEAM API</span>
+          <span class="pill" data-news-sync>// last sync · —</span>
+          <button class="btn btn-ghost" data-news-refresh><i data-lucide="refresh-cw"></i>Refresh</button>
+        </div>
+      </div>
+
+      <div class="news-banner" data-news-banner hidden></div>
+
+      <div class="news-filter" data-news-filter>
+        <div class="news-chip active" data-filter="all">All<span class="ct" data-count="all">—</span></div>
+        <div class="news-chip" data-filter="supported">Supported<span class="ct" data-count="supported">—</span></div>
+        <div class="news-chip" data-filter="beta">Beta<span class="ct" data-count="beta">—</span></div>
+        <div class="news-chip" data-filter="trainable">Trainable<span class="ct" data-count="trainable">—</span></div>
+        <div class="news-chip" data-filter="locked">Locked<span class="ct" data-count="locked">—</span></div>
+      </div>
+
+      <!-- TOP 3 HEROES -->
+      <div class="heroes" data-news-heroes>
+        <div class="hero-card" style="opacity:.5;">
+          <div class="cover g1"><div class="rank">#—</div></div>
+          <div class="body"><h3>Loading…</h3><div class="gen"><span class="gen-tag">Steam API</span></div></div>
+        </div>
+        <div class="hero-card" style="opacity:.5;">
+          <div class="cover g2"><div class="rank">#—</div></div>
+          <div class="body"><h3>Loading…</h3><div class="gen"><span class="gen-tag">Steam API</span></div></div>
+        </div>
+        <div class="hero-card" style="opacity:.5;">
+          <div class="cover g3"><div class="rank">#—</div></div>
+          <div class="body"><h3>Loading…</h3><div class="gen"><span class="gen-tag">Steam API</span></div></div>
+        </div>
+      </div>
+
+      <!-- RANKS 4-10 + RIGHT RAIL -->
+      <div class="news-grid">
+        <div class="card" style="padding: 0;">
+          <table class="news-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Game</th>
+                <th>Genre</th>
+                <th>Players now</th>
+                <th>24h peak</th>
+                <th>Compatibility</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody data-news-rows>
+              <tr><td colspan="7" style="text-align:center; padding: 28px; color: var(--gp-fg-3); font-family: var(--gp-font-mono); font-size: 11px; letter-spacing: 1px;">// fetching steam charts…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; flex-direction: column; gap: 16px;">
+          <div class="card rail-card">
+            <div class="h4">// Trending up <span style="color: var(--gp-success); font-family: var(--gp-font-mono); font-size:10px;">24H</span></div>
+            <div data-news-trending>
+              <div class="trend-row"><div class="game-thumb g4"></div><span class="name">—</span><span class="pct">—</span></div>
+            </div>
+          </div>
+
+          <div class="saved-stat">
+            <div class="big"><em data-news-hours>89,000</em> hrs</div>
+            <p>Across <strong style="color: var(--gp-fg-1);"><span data-news-pilots>12,400</span> pilots</strong>, GamePilot ground out hours of XP this week. That's lifetimes of grind, automated.</p>
+          </div>
+
+          <div class="card rail-card">
+            <div class="h4">// Don't see your game? <i data-lucide="message-circle-question" style="width:14px; height:14px;"></i></div>
+            <p style="font-family: var(--gp-font-body); font-size: 12px; color: var(--gp-fg-2); line-height: 1.5; margin-bottom: 12px;">Suggest a title for the public compatibility index. We review every submission and ship support roughly every two weeks.</p>
+            <a class="btn btn-ghost" style="width:100%; justify-content:center; text-decoration:none;" href="https://github.com/ruslanmv/GamePilot/issues/new?title=Suggest+a+game+for+the+compat+index" target="_blank" rel="noopener"><i data-lucide="git-pull-request"></i>Suggest a Game</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="/static/api.js"></script>
+<script>
+  lucide.createIcons();
+  document.querySelectorAll('.nav-item[data-screen]').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.screen;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.dataset.screen === target));
+    });
+  });
+  if (window.GamePilotAPI) window.GamePilotAPI.bind(document);
+</script>
+</body>
+</html>

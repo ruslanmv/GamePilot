@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 80" fill="none">
+  
+  <g transform="translate(8, 16)">
+    <path d="M0 24 L16 8 L32 24 L24 24 L16 16 L8 24 Z" fill="#0EA5E9"></path>
+    <path d="M0 40 L16 24 L32 40 L24 40 L16 32 L8 40 Z" fill="#D946EF"></path>
+    <circle cx="16" cy="44" r="2.5" fill="#F0F9FF"></circle>
+  </g>
+  
+  <text x="60" y="52" font-family="Rajdhani, sans-serif" font-weight="700" font-size="36" fill="#F0F9FF" letter-spacing="0.5">
+    GAME<tspan fill="#0EA5E9">PILOT</tspan>
+  </text>
+</svg>

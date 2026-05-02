@@ -1,0 +1,158 @@
+/* =========================================================
+ * GamePilot — Colors & Type
+ * Single source of truth for the design system.
+ * Import once at the top of any HTML file.
+ * ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Bungee&display=swap');
+
+:root {
+  /* ---------- COLOR — neutrals / surfaces ---------- */
+  --gp-bg-deep:        #050B14;
+  --gp-bg-panel:       rgba(20, 30, 46, 0.85);
+  --gp-bg-panel-solid: #141E2E;
+  --gp-bg-card:        rgba(15, 23, 42, 0.6);
+  --gp-bg-inset:       rgba(0, 0, 0, 0.4);
+
+  --gp-border:         rgba(56, 189, 248, 0.15);
+  --gp-border-strong:  rgba(56, 189, 248, 0.30);
+  --gp-border-glow:    rgba(56, 189, 248, 0.50);
+
+  /* ---------- COLOR — brand ---------- */
+  --gp-primary:        #0EA5E9;          /* electric sky-blue */
+  --gp-primary-soft:   rgba(14, 165, 233, 0.10);
+  --gp-primary-mid:    rgba(14, 165, 233, 0.40);
+
+  --gp-accent:         #D946EF;          /* neon magenta */
+  --gp-accent-soft:    rgba(217, 70, 239, 0.10);
+  --gp-accent-mid:     rgba(217, 70, 239, 0.40);
+
+  /* ---------- COLOR — semantic ---------- */
+  --gp-success:        #10B981;
+  --gp-success-soft:   rgba(16, 185, 129, 0.10);
+  --gp-warning:        #F59E0B;
+  --gp-warning-soft:   rgba(245, 158, 11, 0.10);
+  --gp-danger:         #F43F5E;
+  --gp-danger-soft:    rgba(244, 63, 94, 0.10);
+  --gp-offline:        #64748B;
+
+  /* ---------- COLOR — text ---------- */
+  --gp-fg-1:           #F0F9FF;          /* primary text */
+  --gp-fg-2:           #CBD5E1;          /* body */
+  --gp-fg-3:           #94A3B8;          /* dim / meta */
+  --gp-fg-4:           #64748B;          /* disabled */
+
+  /* ---------- TYPE families ---------- */
+  --gp-font-display:   'Rajdhani', system-ui, sans-serif;
+  --gp-font-body:      'Inter', system-ui, sans-serif;
+  --gp-font-mono:      'JetBrains Mono', ui-monospace, monospace;
+  --gp-font-meme:      'Bungee', 'Rajdhani', sans-serif; /* one-off marketing only */
+
+  /* ---------- TYPE scale (semantic) ---------- */
+  /* Display — Rajdhani 700, uppercase */
+  --gp-h1-size: 64px;  --gp-h1-line: 1.05; --gp-h1-track: 0.5px;  --gp-h1-weight: 700;
+  --gp-h2-size: 40px;  --gp-h2-line: 1.10; --gp-h2-track: 0.5px;  --gp-h2-weight: 700;
+  --gp-h3-size: 24px;  --gp-h3-line: 1.20; --gp-h3-track: 1px;    --gp-h3-weight: 700;
+  --gp-h4-size: 16px;  --gp-h4-line: 1.30; --gp-h4-track: 1px;    --gp-h4-weight: 700;
+  --gp-eyebrow-size: 11px; --gp-eyebrow-track: 2px; --gp-eyebrow-weight: 600;
+
+  /* Body — Inter */
+  --gp-body-size: 15px; --gp-body-line: 1.55;
+  --gp-small-size: 13px; --gp-small-line: 1.5;
+  --gp-caption-size: 11px; --gp-caption-line: 1.4;
+
+  /* Mono — JetBrains Mono */
+  --gp-mono-size: 12px;
+  --gp-stat-size: 22px;
+  --gp-num-big-size: 48px;
+
+  /* ---------- SPACING ---------- */
+  --gp-space-1: 4px;
+  --gp-space-2: 8px;
+  --gp-space-3: 12px;
+  --gp-space-4: 16px;
+  --gp-space-5: 20px;
+  --gp-space-6: 24px;
+  --gp-space-7: 32px;
+  --gp-space-8: 48px;
+  --gp-space-9: 64px;
+
+  /* ---------- RADII ---------- */
+  --gp-radius-sm: 2px;
+  --gp-radius-md: 4px;
+  --gp-radius-lg: 8px;
+  --gp-radius-pill: 999px;
+
+  /* ---------- SHADOWS / GLOWS ---------- */
+  --gp-glow-primary: 0 0 20px rgba(14, 165, 233, 0.50);
+  --gp-glow-primary-soft: 0 0 12px rgba(14, 165, 233, 0.25);
+  --gp-glow-accent:  0 0 20px rgba(217, 70, 239, 0.50);
+  --gp-glow-success: 0 0 12px rgba(16, 185, 129, 0.40);
+  --gp-glow-danger:  0 0 12px rgba(244, 63, 94, 0.40);
+  --gp-shadow-inset: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  --gp-shadow-card:  0 4px 24px rgba(0, 0, 0, 0.4);
+
+  /* ---------- MOTION ---------- */
+  --gp-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --gp-dur-fast: 120ms;
+  --gp-dur:      200ms;
+  --gp-dur-slow: 400ms;
+}
+
+/* =========================================================
+ * Semantic helpers (apply directly with class names)
+ * ========================================================= */
+
+.gp-h1 {
+  font-family: var(--gp-font-display);
+  font-weight: var(--gp-h1-weight);
+  font-size: var(--gp-h1-size);
+  line-height: var(--gp-h1-line);
+  letter-spacing: var(--gp-h1-track);
+  color: var(--gp-fg-1);
+  text-wrap: balance;
+}
+
+.gp-h2 {
+  font-family: var(--gp-font-display);
+  font-weight: var(--gp-h2-weight);
+  font-size: var(--gp-h2-size);
+  line-height: var(--gp-h2-line);
+  letter-spacing: var(--gp-h2-track);
+  color: var(--gp-fg-1);
+}
+
+.gp-h3 {
+  font-family: var(--gp-font-display);
+  font-weight: var(--gp-h3-weight);
+  font-size: var(--gp-h3-size);
+  line-height: var(--gp-h3-line);
+  letter-spacing: var(--gp-h3-track);
+  text-transform: uppercase;
+  color: var(--gp-fg-1);
+}
+
+.gp-h4 {
+  font-family: var(--gp-font-display);
+  font-weight: var(--gp-h4-weight);
+  font-size: var(--gp-h4-size);
+  line-height: var(--gp-h4-line);
+  letter-spacing: var(--gp-h4-track);
+  text-transform: uppercase;
+  color: var(--gp-fg-1);
+}
+
+.gp-eyebrow {
+  font-family: var(--gp-font-mono);
+  font-weight: var(--gp-eyebrow-weight);
+  font-size: var(--gp-eyebrow-size);
+  letter-spacing: var(--gp-eyebrow-track);
+  text-transform: uppercase;
+  color: var(--gp-primary);
+}
+
+.gp-body  { font-family: var(--gp-font-body); font-size: var(--gp-body-size);  line-height: var(--gp-body-line);  color: var(--gp-fg-2); }
+.gp-small { font-family: var(--gp-font-body); font-size: var(--gp-small-size); line-height: var(--gp-small-line); color: var(--gp-fg-3); }
+.gp-cap   { font-family: var(--gp-font-body); font-size: var(--gp-caption-size); line-height: var(--gp-caption-line); color: var(--gp-fg-3); }
+.gp-mono  { font-family: var(--gp-font-mono); font-size: var(--gp-mono-size); color: var(--gp-fg-2); }
+.gp-stat  { font-family: var(--gp-font-display); font-weight: 700; font-size: var(--gp-stat-size); color: var(--gp-fg-1); }

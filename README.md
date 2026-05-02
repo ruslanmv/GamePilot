@@ -9,6 +9,8 @@
 
 **Works with:** Elden Ring • Dark Souls • Minecraft • Skyrim • Terraria • Valheim • **ANY PC Game**
 
+![GamePilot dashboard — Welcome back, RogueProto · stat cards · Beat Boss / Stay Alive / Build / Farm modes · recent sessions](docs/images/ui-dashboard.png)
+
 ---
 
 ## 🔥 What The Hell Is This?
@@ -301,6 +303,8 @@ If you wanna skip the grind → Skip it!
 ---
 
 ## 🎮 Does It Work With My Game?
+
+![GamePilot News tab — what people are playing now, top-played Steam games tagged Supported / Beta / Trainable / Locked](docs/images/news-tab.png)
 
 ### **YES. Probably. Here's why:**
 
