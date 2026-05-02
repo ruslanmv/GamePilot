@@ -1,0 +1,100 @@
+{
+  "version": "0.1.0",
+  "updated_at": "2026-05-02",
+  "notes": "Hand-curated seed index. Updated server-side ~every two weeks. Add an entry to override the fallback genre-based classifier.",
+  "entries": {
+    "730": {
+      "tier": "locked",
+      "reason": "vac anti-cheat blocks input injection · automation results in account ban",
+      "note": "Counter-Strike 2 — competitive PvP, never autopilot."
+    },
+    "570": {
+      "tier": "locked",
+      "reason": "competitive moba · automation is bannable",
+      "note": "Dota 2"
+    },
+    "578080": {
+      "tier": "supported",
+      "profile": "battle_royale_v0.1",
+      "note": "PUBG: Battlegrounds — solo / training-mode only."
+    },
+    "1172470": {
+      "tier": "beta",
+      "profile": "apex_movement_v0.2",
+      "note": "Apex Legends — single-player firing-range only. Online matches are blocked."
+    },
+    "1091500": {
+      "tier": "supported",
+      "profile": "open_world_rpg_v0.3",
+      "note": "Cyberpunk 2077"
+    },
+    "1086940": {
+      "tier": "trainable",
+      "note": "Baldur's Gate 3 — turn-based, perfect for Create-Model wizard."
+    },
+    "1245620": {
+      "tier": "supported",
+      "profile": "souls_like_v0.4",
+      "note": "Elden Ring"
+    },
+    "252490": {
+      "tier": "beta",
+      "profile": "survival_loop_v0.1",
+      "note": "Rust — single-player / private-server only."
+    },
+    "440": {
+      "tier": "locked",
+      "reason": "vac anti-cheat blocks input injection · automation results in account ban",
+      "note": "Team Fortress 2"
+    },
+    "413150": {
+      "tier": "trainable",
+      "note": "Stardew Valley — farming-sim training profile in scope."
+    },
+    "1888930": {
+      "tier": "supported",
+      "profile": "souls_like_v0.4",
+      "note": "Lies of P (alias)"
+    },
+    "1086940_v2": {
+      "tier": "supported",
+      "profile": "open_world_rpg_v0.3"
+    },
+    "271590": {
+      "tier": "locked",
+      "reason": "online lobbies · automation flagged as cheating",
+      "note": "GTA V — single-player Story Mode is OK in principle but the GTA Online process is bundled."
+    },
+    "292030": {
+      "tier": "supported",
+      "profile": "open_world_rpg_v0.3",
+      "note": "The Witcher 3"
+    },
+    "489830": {
+      "tier": "supported",
+      "profile": "open_world_rpg_v0.3",
+      "note": "Skyrim Special Edition"
+    },
+    "892970": {
+      "tier": "trainable",
+      "note": "Valheim — sandbox build / survival profile training in progress."
+    },
+    "990080": {
+      "tier": "trainable",
+      "note": "Hogwarts Legacy"
+    },
+    "2358720": {
+      "tier": "trainable",
+      "note": "Black Myth: Wukong — souls-like, training pipeline supported."
+    },
+    "2050650": {
+      "tier": "trainable",
+      "note": "Resident Evil 4 Remake"
+    },
+    "1623730": {
+      "tier": "supported",
+      "profile": "sandbox_build_v0.1",
+      "note": "Palworld — single-player & private-server only."
+    }
+  }
+}
