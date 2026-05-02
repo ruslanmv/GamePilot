@@ -304,7 +304,7 @@ If you wanna skip the grind → Skip it!
 
 ## 🎮 Does It Work With My Game?
 
-![GamePilot News tab — what people are playing now, top-played Steam games tagged Supported / Beta / Trainable / Locked](docs/images/news-tab.png)
+![GamePilot News tab — what people are playing now, top-played Steam games tagged Supported / Beta / Trainable / Locked](docs/images/news-tab.jpg)
 
 ### **YES. Probably. Here's why:**
 
